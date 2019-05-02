@@ -1,7 +1,7 @@
 %{
 #include "globals.h"
 #include "util.h"
-#include "stdio.h"
+#include <stdio.h>
 
 /* follow standard C identifier length */
 #define MAXTOKENLEN 31

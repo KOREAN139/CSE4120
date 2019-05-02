@@ -51,3 +51,68 @@ void printToken(TokenType token, const char *tokenString)
                 fprintf(listing, "Unknown token: %d\n", token);
         }
 }
+
+/*
+ * newStmtNode creates new statement node, initialize with given kind,
+ * then return initialized node
+ */
+TreeNode *newStmtNode(StmtKind kind)
+{
+        /*
+         * The conversion from void pointer to any other pointer type is
+         * guaranteed by the C programming language
+         */
+        TreeNode *t = malloc(sizeof(TreeNode));
+        int i;
+        if (!t) {
+                fprintf(listing, "Out of memory error at line %d\n", lineno);
+        } else {
+                for (i = 0; i < MAXCHILDREN; i++)
+                        t->child[i] = NULL;
+                t->sibling = NULL;
+                t->nodekind = StmtK;
+                t->kind.stmt = kind;
+                t->lineno = lineno;
+        }
+        return t;
+}
+
+/*
+ * newExprNode creates new expression node, initialize with given kind,
+ * then return initialized node
+ */
+TreeNode *newExprNode(ExprKind kind)
+{
+        TreeNode *t = malloc(sizeof(TreeNode));
+        int i;
+        if (!t) {
+                fprintf(listing, "Out of memory error at line %d\n", lineno);
+        } else {
+                for (i = 0; i < MAXCHILDREN; i++)
+                        t->child[i] = NULL;
+                t->sibling = NULL;
+                t->nodekind = ExprK;
+                t->kind.stmt = kind;
+                t->lineno = lineno;
+        }
+}
+
+/*
+ * newDeclNode creates new declaration node, initialize with given kind,
+ * then return initialized node
+ */
+TreeNode *newDeclNode(DeclKind kind)
+{
+        TreeNode *t = malloc(sizeof(TreeNode));
+        int i;
+        if (!t) {
+                fprintf(listing, "Out of memory error at line %d\n", lineno);
+        } else {
+                for (i = 0; i < MAXCHILDREN; i++)
+                        t->child[i] = NULL;
+                t->sibling = NULL;
+                t->nodekind = DeclK;
+                t->kind.stmt = kind;
+                t->lineno = lineno;
+        }
+}
