@@ -58,11 +58,11 @@ comp_stmt       : LCURLY local_decl stmt_list RCURLY
                 ;
 
 local_decl      : local_decl var_decl
-                | empty
+                | /* empty */
                 ;
 
 stmt_list       : stmt_list stmt
-                | empty
+                | /* empty */
                 ;
 
 stmt            : expr_stmt
@@ -133,15 +133,11 @@ call            : ID LPAREN args RPAREN
                 ;
 
 args            : arg_list
-                | empty
+                | /* empty */
                 ;
 
 arg_list        : arg_list COMMA expr
                 | expr
-                ;
-
-/* temporary */
-empty           :
                 ;
 
 %%
