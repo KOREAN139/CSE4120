@@ -6,6 +6,24 @@
 #include <ctype.h>
 #include <string.h>
 
+/*
+ * Yacc/Bison generates internally its own values
+ * for the tokens. Other files can access these values
+ * by including the tab.h file generated using the
+ * Yacc/Bison option -d ("generate header")
+ *
+ * The YYPARSER flag prevents inclusion of the tab.h
+ * into the Yacc/Bison output itself
+ */
+#ifndef YYPARSER
+#include "y.tab.h"
+/*
+ * ENDFILE is implicitly defined by Yacc/Bison,
+ * and not included in the tab.h file
+ */
+#define ENDFILE 0
+#endif
+
 #ifndef FALSE
 #define FALSE 0
 #endif
@@ -45,5 +63,8 @@ extern int lineno;
  * recognized by the scanner
  */
 extern int TraceScan;
+
+/* Error = TRUE prevents further passes if an error occurs */
+extern int Error; 
 
 #endif
