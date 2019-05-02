@@ -2,10 +2,11 @@
 #include "globals.h"
 #include "util.h"
 #include "stdio.h"
+
 /* follow standard C identifier length */
 #define MAXTOKENLEN 31
 char tokenString[MAXTOKENLEN+1];
-void yyerror(char const *);
+static void yyerror(char const *);
 %}
 
 digit       [0-9]
@@ -59,7 +60,7 @@ whitespace  [ \t]+
                           }
                   }
                 }
-<<EOF>>         { return ENDFILE; }
+<<EOF>>         { return ENDOFFILE; }
 {number}        { return NUM; }
 {identifier}    { return ID; }
 {newline}       { lineno++; }
@@ -92,7 +93,7 @@ int yywrap()
         /* actions for reaching EOF */
 }
 
-void yyerror(char const *msg)
+static void yyerror(char const *msg)
 {
         strcpy(yytext, msg);
 }

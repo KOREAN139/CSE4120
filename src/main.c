@@ -33,7 +33,7 @@ int main(int argc, char *argv[])
         fprintf(listing, "   line number\t\ttoken\t\tlexeme\n");
         fprintf(listing, 
                 "----------------------------------------------------\n");
-        while (getToken() != ENDFILE);
+        while (getToken() != ENDOFFILE);
         fclose(source);
         return 0;
 }

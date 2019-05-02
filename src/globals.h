@@ -16,7 +16,7 @@
  * into the Yacc/Bison output itself
  */
 #ifndef YYPARSER
-#include "y.tab.h"
+#include "tiny.tab.h"
 /*
  * ENDFILE is implicitly defined by Yacc/Bison,
  * and not included in the tab.h file
@@ -35,17 +35,8 @@
 /* MAXRESERVED = the number of reserved words */
 #define MAXRESERVED 6
 
-typedef enum {
-        /* book-keeping tokens */
-        ENDFILE, ERROR,
-        /* reserved words */
-        IF, ELSE, INT, RETURN, VOID, WHILE,
-        /* multicharacter tokens */
-        ID, NUM,
-        /* special symbols */
-        ASSIGN, EQ, NEQ, LT, LTE, GT, GTE, PLUS, MINUS, TIMES, OVER,
-        LPAREN, RPAREN, LBRAC, RBRAC, LCURLY, RCURLY, COMMA, SEMI
-} TokenType;
+/* Yacc/Bison uses its own TokenType */
+typedef int TokenType;
 
 /* source code text file */
 extern FILE *source;

@@ -2,10 +2,10 @@
 #include "util.h"
 
 static char const *tokenName[] = {
-        "EOF", "ERROR", "IF", "ELSE", "INT", "RETURN", "VOID",
-        "WHILE", "ID", "NUM", "=", "==", "!=", "<", "<=", ">",
-        ">=", "+", "-", "*", "/", "(", ")", "[", "]", "{", "}",
-        ",", ";"
+        "IF", "ELSE", "INT", "RETURN", "VOID", "WHILE",
+        "ID", "NUM", "=", "==", "!=", "<", "<=", ">",
+        ">=", "+", "-", "*", "/", "(", ")", "[", "]",
+        "{", "}", ",", ";", "EOF", "ERROR"
 };
 
 /* 
@@ -40,12 +40,12 @@ void printToken(TokenType token, const char *tokenString)
         case MINUS:
         case TIMES:
         case OVER:
-        case ENDFILE:
+        case ENDOFFILE:
         case NUM:
         case ID:
         case ERROR:
                 fprintf(listing, "\t\t%s\t\t%s\n",
-                        tokenName[token], tokenString);
+                        tokenName[token-IF], tokenString);
                 break;
         default: /* should never happen */
                 fprintf(listing, "Unknown token: %d\n", token);

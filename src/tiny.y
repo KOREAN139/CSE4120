@@ -3,8 +3,10 @@
 
 #include "globals.h"
 #include "util.h"
+#include "scan.h"
 
-static int yyerror(void);
+int Error = FALSE;
+int yyerror(char *);
 static int yylex(void);
 %}
 
@@ -12,7 +14,7 @@ static int yylex(void);
 %token ID NUM 
 %token ASSIGN EQ NEQ LT LTE GT GTE PLUS MINUS TIMES OVER LPAREN RPAREN
 %token LBRAC RBRAC LCURLY RCURLY COMMA SEMI
-%token ERROR 
+%token ENDOFFILE ERROR
 
 /* left-associative, +,- has lower precedence than *,/ */
 %left PLUS MINUS
@@ -142,7 +144,7 @@ arg_list        : arg_list COMMA expr
 
 %%
 
-static int yyerror(char *message)
+int yyerror(char *message)
 {
         fprintf(listing, "Syntax error at line %d: %s\n", lineno, message);
         fprintf(listing, "Current token: ");
