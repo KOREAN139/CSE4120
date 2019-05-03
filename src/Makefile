@@ -1,6 +1,6 @@
 CC = gcc
 
-CFLAGS = 
+CFLAGS =
 
 OBJS = lex.yy.o tiny.tab.o main.o util.o
 

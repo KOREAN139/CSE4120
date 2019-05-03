@@ -8,12 +8,13 @@ FILE *listing;
 FILE *code;
 
 /* allocate and set tracing flags */
-int TraceScan = TRUE;
+int TraceScan = FALSE;
 
 TokenType getToken(void);
 
 int main(int argc, char *argv[])
 {
+        TreeNode *syntaxTree;
         /* source code file name */
         char pgm[120];
         if (argc != 2) {
@@ -30,10 +31,9 @@ int main(int argc, char *argv[])
         }
         /* send listing to screen */
         listing = stdout;
-        fprintf(listing, "   line number\t\ttoken\t\tlexeme\n");
-        fprintf(listing, 
-                "----------------------------------------------------\n");
-        while (getToken() != ENDOFFILE);
+        syntaxTree = parse();
+        fprintf(listing, "\nSyntax tree:\n");
+        printTree(syntaxTree);
         fclose(source);
         return 0;
 }
