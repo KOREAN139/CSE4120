@@ -222,8 +222,7 @@ void printTree(TreeNode *curr)
                                                 typeName[curr->type]);
                                 break;
                         case FunCallK:
-                                fprintf(listing, "Call %s\n",
-                                                curr->attr.name);
+                                fprintf(listing, "Call\n");
                                 break;
                         case ArrSubK:
                                 fprintf(listing, "Array Subscript\n");

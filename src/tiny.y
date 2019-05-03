@@ -443,9 +443,10 @@ call            : ID
                   LPAREN args RPAREN
                         {
                                 $$ = newExprNode(FunCallK);
-                                $$->attr.name = savedName;
                                 $$->lineno = savedLineNo;
-                                $$->child[0] = $4;
+                                $$->child[0] = newExprNode(IdK);
+                                $$->child[0]->attr.name = savedName;
+                                $$->child[1] = $4;
                         }
                 ;
 

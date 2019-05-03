@@ -32,8 +32,10 @@ int main(int argc, char *argv[])
         /* send listing to screen */
         listing = stdout;
         syntaxTree = parse();
-        fprintf(listing, "\nSyntax tree:\n");
-        printTree(syntaxTree);
+        if (!Error) {
+                fprintf(listing, "\nSyntax tree:\n");
+                printTree(syntaxTree);
+        }
         fclose(source);
         return 0;
 }
