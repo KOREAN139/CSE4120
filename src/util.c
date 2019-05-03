@@ -121,6 +121,7 @@ TreeNode *newExprNode(ExprKind kind)
                 t->kind.stmt = kind;
                 t->lineno = lineno;
         }
+        return t;
 }
 
 /*
@@ -141,4 +142,5 @@ TreeNode *newDeclNode(DeclKind kind)
                 t->kind.stmt = kind;
                 t->lineno = lineno;
         }
+        return t;
 }
