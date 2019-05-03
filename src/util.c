@@ -53,6 +53,32 @@ void printToken(TokenType token, const char *tokenString)
 }
 
 /*
+ * Function copyString allocates and makes a new
+ * copy of an existing string
+ */
+char *copyString(char *s)
+{
+        if (!s)
+                return NULL;
+        int n = strlen(s) + 1;
+        char *t = malloc(n);
+        if (!t)
+                fprintf(listing, "Out of memory error at line %d\n", lineno);
+        else
+                strcpy(t,s);
+        return t;
+}
+
+/*
+ * Function copyValue calculates value of given string
+ * and returns its value
+ */
+int copyValue(char *s)
+{
+        return atoi(s);
+}
+
+/*
  * newStmtNode creates new statement node, initialize with given kind,
  * then return initialized node
  */

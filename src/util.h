@@ -3,12 +3,25 @@
 
 #include "globals.h"
 #include <stdlib.h>
+#include <string.h>
 
-/* 
+/*
  * Procedure printToken prints a token 
  * and its lexeme to the listing file
  */
 void printToken(TokenType, const char *);
+
+/*
+ * Function copyString allocates and makes a new
+ * copy of an existing string
+ */
+char *copyString(char *);
+
+/*
+ * Function copyValue calculates value of given string
+ * and returns its value
+ */
+int copyValue(char *);
 
 /*
  * newStmtNode creates new statement node, initialize with given kind,

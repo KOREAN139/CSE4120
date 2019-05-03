@@ -54,15 +54,15 @@ typedef enum {
 } NodeKind;
 /* specify statement's kind */
 typedef enum {
-        IfK, ReturnK, WhileK
+        IfK, ReturnK, WhileK, CompK
 } StmtKind;
 /* specify expression's kind */
 typedef enum {
-        OpK, ConstK, IdK
+        OpK, ConstK, IdK, AssignK, FunCallK
 } ExprKind;
 /* specify declaration's kind*/
 typedef enum {
-        VarK, FunK
+        TypeK, VarK, ArrayK, FunK
 } DeclKind;
 /* specify expression's type */
 typedef enum {
