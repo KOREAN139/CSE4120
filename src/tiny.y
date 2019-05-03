@@ -8,6 +8,7 @@
 #define YYSTYPE TreeNode *
 int Error = FALSE;
 static char *savedName;
+static char *savedFunc;
 static int savedLineNo;
 static int savedValue;
 static int savedOp;
@@ -113,17 +114,18 @@ type            : INT
 
 fun_decl        : type ID
                         {
-                                savedName = copyString(idString);
+                                savedFunc = copyString(idString);
                                 savedLineNo = lineno;
                         }
                   LPAREN params RPAREN comp_stmt
                         {
                                 $$ = newDeclNode(FunK);
-                                $$->attr.name = savedName;
                                 $$->lineno = savedLineNo;
                                 $$->child[0] = $1;
-                                $$->child[1] = $5;
-                                $$->child[2] = $7;
+                                $$->child[1] = newExprNode(IdK);
+                                $$->child[1]->attr.name = savedFunc;
+                                $$->child[2] = $5;
+                                $$->child[3] = $7;
                                 $$->type = $1->type;
                         }
                 ;
@@ -321,10 +323,11 @@ var             : ID
                         }
                   LBRAC expr RBRAC
                         {
-                                $$ = newExprNode(IdK);
-                                $$->attr.name = savedName;
+                                $$ = newExprNode(ArrSubK);
                                 $$->lineno = savedLineNo;
-                                $$->child[0] = $4;
+                                $$->child[0] = newExprNode(IdK);
+                                $$->child[0]->attr.name = savedName;
+                                $$->child[1] = $4;
                         }
                 ;
 
