@@ -8,6 +8,18 @@ static char const *tokenName[] = {
         "{", "}", ",", ";", "ERROR"
 };
 
+static char const *stmtName[] = {
+        "If", "Return", "While", "Compound"
+};
+static char const *declName[] = {
+        "Variable", "Array", "Function"
+};
+static char const *typeName[] = {
+        "void", "int"
+};
+
+static int indentLevel = 0;
+
 /* 
  * Procedure printToken prints a token 
  * and its lexeme to the listing file
@@ -146,4 +158,86 @@ TreeNode *newDeclNode(DeclKind kind)
                 t->lineno = lineno;
         }
         return t;
+}
+
+/* printSpaces indents by printing spaces */
+static void printSpaces()
+{
+        int i;
+        for (i = 0; i < indentLevel; i++)
+                fprintf(listing, "  ");
+}
+
+/*
+ * procedure printTree prints a syntax tree to the 
+ * listing file using indentation to indicate subtrees
+ */
+void printTree(TreeNode *curr)
+{
+        int i;
+        indentLevel += 1;
+        while (curr) {
+                printSpaces();
+                if (curr->nodekind == DeclK) {
+                        switch (curr->kind.decl) {
+                        case VarK:
+                        case ArrayK:
+                        case FunK:
+                                fprintf(listing, "%s Declaration\n",
+                                                declName[curr->kind.decl]);
+                                break;
+                        default:
+                                fprintf(listing, "Unknown DeclNode kind\n");
+                                break;
+                        }
+                } else if (curr->nodekind == StmtK) {
+                        switch (curr->kind.stmt) {
+                        case IfK:
+                        case WhileK:
+                        case CompK:
+                        case ReturnK:
+                                fprintf(listing, "%s\n",
+                                                stmtName[curr->kind.stmt]);
+                                break;
+                        default:
+                                fprintf(listing, "Unknown StmtNode kind\n");
+                                break;
+                        }
+                } else if (curr->nodekind == ExprK) {
+                        switch (curr->kind.expr) {
+                        case OpK:
+                                fprintf(listing, "Op: %s\n",
+                                                tokenName[curr->attr.op-IF]);
+                                break;
+                        case ConstK:
+                                fprintf(listing, "Const: %d\n",
+                                                curr->attr.val);
+                                break;
+                        case IdK:
+                                fprintf(listing, "ID: %s\n",
+                                                curr->attr.name);
+                                break;
+                        case TypeK:
+                                fprintf(listing, "Type: %s\n",
+                                                typeName[curr->type]);
+                                break;
+                        case FunCallK:
+                                fprintf(listing, "Call %s\n",
+                                                curr->attr.name);
+                                break;
+                        case ArrSubK:
+                                fprintf(listing, "Array Subscript\n");
+                                break;
+                        default:
+                                fprintf(listing, "Unknown ExprNode kind\n");
+                                break;
+                        }
+                } else {
+                        fprintf(listing, "Unknown node kind\n");
+                }
+                for (i = 0; i < MAXCHILDREN; i++)
+                        printTree(curr->child[i]);
+                curr = curr->sibling;
+        }
+        indentLevel -= 1;
 }

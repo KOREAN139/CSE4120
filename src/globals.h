@@ -58,7 +58,7 @@ typedef enum {
 } StmtKind;
 /* specify expression's kind */
 typedef enum {
-        OpK, ConstK, IdK, TypeK, FunCallK
+        OpK, ConstK, IdK, TypeK, FunCallK, ArrSubK
 } ExprKind;
 /* specify declaration's kind*/
 typedef enum {
@@ -69,7 +69,7 @@ typedef enum {
         Void, Integer
 } ExprType;
 
-#define MAXCHILDREN 3
+#define MAXCHILDREN 4
 /* structure of node in syntax tree */
 typedef struct _TreeNode {
         struct _TreeNode *child[MAXCHILDREN];
