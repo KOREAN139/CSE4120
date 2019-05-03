@@ -60,7 +60,7 @@ whitespace  [ \t]+
                           }
                   }
                 }
-<<EOF>>         { return ENDOFFILE; }
+<<EOF>>         { return ENDFILE; }
 {number}        { return NUM; }
 {identifier}    { return ID; }
 {newline}       { lineno++; }

@@ -21,7 +21,7 @@ static int yylex(void);
 %token ID NUM 
 %token ASSIGN EQ NEQ LT LTE GT GTE PLUS MINUS TIMES OVER LPAREN RPAREN
 %token LBRAC RBRAC LCURLY RCURLY COMMA SEMI
-%token ENDOFFILE ERROR
+%token ERROR
 
 /* left-associative, +,- has lower precedence than *,/ */
 %left PLUS MINUS
@@ -73,6 +73,10 @@ var_decl        : type ID
                                 $$ = newDeclNode(VarK);
                                 $$->attr.name = savedName;
                                 $$->lineno = savedLineNo;
+                                $$->child[0] = $1;
+                                $$->child[1] = newExprNode(IdK);
+                                $$->child[1]->attr.name =
+                                copyString(tokenString);
                                 $$->type = $1->type;
                         }
                 | type ID
@@ -89,21 +93,24 @@ var_decl        : type ID
                                 $$ = newDeclNode(ArrayK);
                                 $$->attr.name = savedName;
                                 $$->lineno = savedLineNo;
-                                $$->val = savedValue;
+                                $$->child[0] = $1;
+                                $$->child[1] = newExprNode(IdK);
+                                $$->child[1]->attr.name =
+                                copyString(tokenString);
+                                $$->child[2] = newExprNode(ConstK);
+                                $$->child[2]->attr.val = savedValue;
                                 $$->type = $1->type;
                         }
                 ;
 
 type            : INT
                         {
-                                $$ = newDeclNode(TypeK);
-                                $$->lineno = lineno;
+                                $$ = newExprNode(TypeK);
                                 $$->type = Integer;
                         }
                 | VOID
                         {
-                                $$ = newDeclNode(TypeK);
-                                $$->lineno = lineno;
+                                $$ = newExprNode(TypeK);
                                 $$->type = Void;
                         }
                 ;
@@ -118,9 +125,10 @@ fun_decl        : type ID
                                 $$ = newDeclNode(FunK);
                                 $$->attr.name = savedName;
                                 $$->lineno = savedLineNo;
+                                $$->child[0] = $1;
+                                $$->child[1] = $5;
+                                $$->child[2] = $7;
                                 $$->type = $1->type;
-                                $$->child[0] = $5;
-                                $$->child[0] = $7;
                         }
                 ;
 
@@ -157,6 +165,10 @@ param           : type ID
                                 $$ = newDeclNode(VarK);
                                 $$->attr.name = copyString(tokenString);
                                 $$->lineno = lineno;
+                                $$->child[0] = $1;
+                                $$->child[1] = newExprNode(IdK);
+                                $$->child[1]->attr.name =
+                                copyString(tokenString);
                                 $$->type = $1->type;
                         }
                 | type ID
@@ -169,6 +181,12 @@ param           : type ID
                                 $$ = newDeclNode(ArrayK);
                                 $$->attr.name = savedName;
                                 $$->lineno = savedLineNo;
+                                $$->child[0] = $1;
+                                $$->child[1] = newExprNode(IdK);
+                                $$->child[1]->attr.name =
+                                copyString(tokenString);
+                                $$->child[2] = newExprNode(ConstK);
+                                $$->child[2]->attr.val = 0;
                                 $$->type = $1->type;
                         }
                 ;
@@ -176,7 +194,6 @@ param           : type ID
 comp_stmt       : LCURLY local_decl stmt_list RCURLY
                         {
                                 $$ = newStmtNode(CompK);
-                                $$->lineno = lineno;
                                 $$->child[0] = $2;
                                 $$->child[1] = $3;
                         }
@@ -253,14 +270,12 @@ expr_stmt       : expr SEMI
 select_stmt     : IF LPAREN expr RPAREN stmt
                         {
                                 $$ = newStmtNode(IfK);
-                                $$->lineno = lineno;
                                 $$->child[0] = $3;
                                 $$->child[1] = $5;
                         }
                 | IF LPAREN expr RPAREN stmt ELSE stmt
                         {
                                 $$ = newStmtNode(IfK);
-                                $$->lineno = lineno;
                                 $$->child[0] = $3;
                                 $$->child[1] = $5;
                                 $$->child[2] = $7;
@@ -270,7 +285,6 @@ select_stmt     : IF LPAREN expr RPAREN stmt
 iter_stmt       : WHILE LPAREN expr RPAREN stmt
                         {
                                 $$ = newStmtNode(WhileK);
-                                $$->lineno = lineno;
                                 $$->child[0] = $3;
                                 $$->child[1] = $5;
                         }
@@ -279,21 +293,18 @@ iter_stmt       : WHILE LPAREN expr RPAREN stmt
 return_stmt     : RETURN SEMI
                         {
                                 $$ = newStmtNode(ReturnK);
-                                $$->lineno = lineno;
                         }
                 | RETURN expr SEMI
                         {
                                 $$ = newStmtNode(ReturnK);
-                                $$->lineno = lineno;
                                 $$->child[0] = $2;
                         }
                 ;
 
 expr            : var ASSIGN expr
                         {
-                                $$ = newExprNode(AssignK);
+                                $$ = newExprNode(OpK);
                                 $$->attr.op = ASSIGN;
-                                $$->lineno = lineno;
                                 $$->child[0] = $1;
                                 $$->child[1] = $3;
                         }
@@ -327,7 +338,6 @@ simple_expr     : add_expr relop add_expr
                         {
                                 $$ = newExprNode(OpK);
                                 $$->attr.op = savedOp;
-                                $$->lineno = lineno;
                                 $$->child[0] = $1;
                                 $$->child[1] = $3;
                         }
@@ -367,7 +377,6 @@ add_expr        : add_expr addop term
                         {
                                 $$ = newExprNode(OpK);
                                 $$->attr.op = savedOp;
-                                $$->lineno = lineno;
                                 $$->child[0] = $1;
                                 $$->child[1] = $3;
                         }
@@ -391,7 +400,6 @@ term            : term mulop factor
                         {
                                 $$ = newExprNode(OpK);
                                 $$->attr.op = savedOp;
-                                $$->lineno = lineno;
                                 $$->child[0] = $1;
                                 $$->child[1] = $3;
                         }
@@ -427,7 +435,6 @@ factor          : LPAREN expr RPAREN
                         {
                                 $$ = newExprNode(ConstK);
                                 $$->attr.val = copyValue(tokenString);
-                                $$->lineno = lineno;
                         }
                 ;
 
@@ -489,7 +496,8 @@ static int yylex(void)
         return getToken();
 }
 
-void parse(void)
+TreeNode *parse(void)
 {
         yyparse();
+        return syntaxTree;
 }

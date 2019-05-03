@@ -5,7 +5,7 @@ static char const *tokenName[] = {
         "IF", "ELSE", "INT", "RETURN", "VOID", "WHILE",
         "ID", "NUM", "=", "==", "!=", "<", "<=", ">",
         ">=", "+", "-", "*", "/", "(", ")", "[", "]",
-        "{", "}", ",", ";", "EOF", "ERROR"
+        "{", "}", ",", ";", "ERROR"
 };
 
 /* 
@@ -40,12 +40,15 @@ void printToken(TokenType token, const char *tokenString)
         case MINUS:
         case TIMES:
         case OVER:
-        case ENDOFFILE:
         case NUM:
         case ID:
         case ERROR:
                 fprintf(listing, "\t\t%s\t\t%s\n",
                         tokenName[token-IF], tokenString);
+                break;
+        case ENDFILE:
+                fprintf(listing, "\t\t%s\t\t%s\n",
+                        "EOF", tokenString);
                 break;
         default: /* should never happen */
                 fprintf(listing, "Unknown token: %d\n", token);

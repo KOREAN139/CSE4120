@@ -58,11 +58,11 @@ typedef enum {
 } StmtKind;
 /* specify expression's kind */
 typedef enum {
-        OpK, ConstK, IdK, AssignK, FunCallK
+        OpK, ConstK, IdK, TypeK, FunCallK
 } ExprKind;
 /* specify declaration's kind*/
 typedef enum {
-        TypeK, VarK, ArrayK, FunK
+        VarK, ArrayK, FunK
 } DeclKind;
 /* specify expression's type */
 typedef enum {
@@ -86,7 +86,6 @@ typedef struct _TreeNode {
                 int val;
                 char *name;
         } attr;
-        int val;
         ExprType type;
 } TreeNode;
 
