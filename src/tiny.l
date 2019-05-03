@@ -6,6 +6,7 @@
 /* follow standard C identifier length */
 #define MAXTOKENLEN 31
 char tokenString[MAXTOKENLEN+1];
+char idString[MAXTOKENLEN+1];
 static void yyerror(char const *);
 %}
 
@@ -80,6 +81,7 @@ TokenType getToken(void)
                 yyout = listing;
         }
         currentToken = yylex();
+        strncpy(idString, tokenString, MAXTOKENLEN);
         strncpy(tokenString, yytext, MAXTOKENLEN);
         if (TraceScan) {
                 fprintf(listing, "\t%d", lineno);

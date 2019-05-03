@@ -65,23 +65,21 @@ decl            : var_decl
 
 var_decl        : type ID 
                         {
-                                savedName = copyString(tokenString);
+                                savedName = copyString(idString);
                                 savedLineNo = lineno;
                         }
                   SEMI
                         {
                                 $$ = newDeclNode(VarK);
-                                $$->attr.name = savedName;
                                 $$->lineno = savedLineNo;
                                 $$->child[0] = $1;
                                 $$->child[1] = newExprNode(IdK);
-                                $$->child[1]->attr.name =
-                                copyString(tokenString);
+                                $$->child[1]->attr.name = savedName;
                                 $$->type = $1->type;
                         }
                 | type ID
                         {
-                                savedName = copyString(tokenString);
+                                savedName = copyString(idString);
                                 savedLineNo = lineno;
                         }
                   LBRAC NUM
@@ -91,12 +89,10 @@ var_decl        : type ID
                   RBRAC SEMI
                         {
                                 $$ = newDeclNode(ArrayK);
-                                $$->attr.name = savedName;
                                 $$->lineno = savedLineNo;
                                 $$->child[0] = $1;
                                 $$->child[1] = newExprNode(IdK);
-                                $$->child[1]->attr.name =
-                                copyString(tokenString);
+                                $$->child[1]->attr.name = savedName;
                                 $$->child[2] = newExprNode(ConstK);
                                 $$->child[2]->attr.val = savedValue;
                                 $$->type = $1->type;
@@ -117,7 +113,7 @@ type            : INT
 
 fun_decl        : type ID
                         {
-                                savedName = copyString(tokenString);
+                                savedName = copyString(idString);
                                 savedLineNo = lineno;
                         }
                   LPAREN params RPAREN comp_stmt
@@ -163,28 +159,26 @@ param_list      : param_list COMMA param
 param           : type ID
                         {
                                 $$ = newDeclNode(VarK);
-                                $$->attr.name = copyString(tokenString);
+                                $$->attr.name = copyString(idString);
                                 $$->lineno = lineno;
                                 $$->child[0] = $1;
                                 $$->child[1] = newExprNode(IdK);
                                 $$->child[1]->attr.name =
-                                copyString(tokenString);
+                                copyString(idString);
                                 $$->type = $1->type;
                         }
                 | type ID
                         {
-                                savedName = copyString(tokenString);
+                                savedName = copyString(idString);
                                 savedLineNo = lineno;
                         }
                   LBRAC RBRAC
                         {
                                 $$ = newDeclNode(ArrayK);
-                                $$->attr.name = savedName;
                                 $$->lineno = savedLineNo;
                                 $$->child[0] = $1;
                                 $$->child[1] = newExprNode(IdK);
-                                $$->child[1]->attr.name =
-                                copyString(tokenString);
+                                $$->child[1]->attr.name = savedName;
                                 $$->child[2] = newExprNode(ConstK);
                                 $$->child[2]->attr.val = 0;
                                 $$->type = $1->type;
@@ -317,12 +311,12 @@ expr            : var ASSIGN expr
 var             : ID
                         {
                                 $$ = newExprNode(IdK);
-                                $$->attr.name = copyString(tokenString);
+                                $$->attr.name = copyString(idString);
                                 $$->lineno = lineno;
                         }
                 | ID
                         {
-                                savedName = copyString(tokenString);
+                                savedName = copyString(idString);
                                 savedLineNo = lineno;
                         }
                   LBRAC expr RBRAC
@@ -440,7 +434,7 @@ factor          : LPAREN expr RPAREN
 
 call            : ID
                         {
-                                savedName = copyString(tokenString);
+                                savedName = copyString(idString);
                                 savedLineNo = lineno;
                         }
                   LPAREN args RPAREN
