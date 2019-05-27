@@ -10,11 +10,11 @@ FILE *code;
 /* allocate and set tracing flags */
 int TraceScan = FALSE;
 
-TokenType getToken(void);
+token_t get_token(void);
 
 int main(int argc, char *argv[])
 {
-        TreeNode *syntaxTree;
+        node_t *syntax_tree;
         /* source code file name */
         char pgm[120];
         if (argc != 2) {
@@ -31,11 +31,12 @@ int main(int argc, char *argv[])
         }
         /* send listing to screen */
         listing = stdout;
-        syntaxTree = parse();
+        syntax_tree = parse();
         if (!Error) {
                 fprintf(listing, "\nSyntax tree:\n");
-                printTree(syntaxTree);
+                print_tree(syntax_tree);
         }
+        /* Do build symbol table, check types */
         fclose(source);
         return 0;
 }

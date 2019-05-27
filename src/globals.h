@@ -35,8 +35,8 @@
 /* MAXRESERVED = the number of reserved words */
 #define MAXRESERVED 6
 
-/* Yacc/Bison uses its own TokenType */
-typedef int TokenType;
+/* Yacc/Bison uses its own token_t */
+typedef int token_t;
 
 /* source code text file */
 extern FILE *source;
@@ -51,43 +51,43 @@ extern int lineno;
 /* specify node's kind */
 typedef enum {
         StmtK, ExprK, DeclK
-} NodeKind;
+} node_kind_t;
 /* specify statement's kind */
 typedef enum {
         IfK, ReturnK, WhileK, CompK
-} StmtKind;
+} stmt_t;
 /* specify expression's kind */
 typedef enum {
         OpK, ConstK, IdK, TypeK, FunCallK, ArrSubK
-} ExprKind;
+} expr_t;
 /* specify declaration's kind*/
 typedef enum {
         VarK, ArrayK, FunK
-} DeclKind;
+} decl_t;
 /* specify expression's type */
 typedef enum {
         Void, Integer
-} ExprType;
+} type_t;
 
 #define MAXCHILDREN 4
 /* structure of node in syntax tree */
-typedef struct _TreeNode {
-        struct _TreeNode *child[MAXCHILDREN];
-        struct _TreeNode *sibling;
+typedef struct _node_t {
+        struct _node_t *child[MAXCHILDREN];
+        struct _node_t *sibling;
         int lineno;
-        NodeKind nodekind;
+        node_kind_t nodekind;
         union {
-                StmtKind stmt;
-                ExprKind expr;
-                DeclKind decl;
+                stmt_t stmt;
+                expr_t expr;
+                decl_t decl;
         } kind;
         union {
-                TokenType op;
+                token_t op;
                 int val;
                 char *name;
         } attr;
-        ExprType type;
-} TreeNode;
+        type_t type;
+} node_t;
 
 /* 
  * TraceScan = TRUE causes token information to be

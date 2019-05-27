@@ -5,8 +5,8 @@
 
 /* follow standard C identifier length */
 #define MAXTOKENLEN 31
-char tokenString[MAXTOKENLEN+1];
-char idString[MAXTOKENLEN+1];
+char token_string[MAXTOKENLEN+1];
+char id_string[MAXTOKENLEN+1];
 static void yyerror(char const *);
 %}
 
@@ -70,24 +70,24 @@ whitespace  [ \t]+
 
 %%
 
-TokenType getToken(void)
+token_t get_token(void)
 {
-        static int firstTime = TRUE;
-        TokenType currentToken;
-        if (firstTime) { 
-                firstTime = FALSE;
+        static int first_time = TRUE;
+        token_t current_token;
+        if (first_time) {
+                first_time = FALSE;
                 lineno++;
                 yyin = source;
                 yyout = listing;
         }
-        currentToken = yylex();
-        strncpy(idString, tokenString, MAXTOKENLEN);
-        strncpy(tokenString, yytext, MAXTOKENLEN);
+        current_token = yylex();
+        strncpy(id_string, token_string, MAXTOKENLEN);
+        strncpy(token_string, yytext, MAXTOKENLEN);
         if (TraceScan) {
                 fprintf(listing, "\t%d", lineno);
-                printToken(currentToken, tokenString);
+                print_token(current_token, token_string);
         }
-        return currentToken;
+        return current_token;
 }
 
 int yywrap()

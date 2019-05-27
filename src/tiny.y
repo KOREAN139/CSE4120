@@ -5,14 +5,14 @@
 #include "util.h"
 #include "scan.h"
 
-#define YYSTYPE TreeNode *
+#define YYSTYPE node_t *
 int Error = FALSE;
-static char *savedName;
-static char *savedFunc;
-static int savedLineNo;
-static int savedValue;
-static int savedOp;
-static TreeNode *syntaxTree;
+static char *saved_name;
+static char *saved_func;
+static int saved_lineno;
+static int saved_value;
+static int saved_op;
+static node_t *syntax_tree;
 
 int yyerror(char *);
 static int yylex(void);
@@ -32,7 +32,7 @@ static int yylex(void);
 
 program         : decl_list
                         {
-                                syntaxTree = $1;
+                                syntax_tree = $1;
                         }
                 ;
 
@@ -66,64 +66,64 @@ decl            : var_decl
 
 var_decl        : type ID 
                         {
-                                savedName = copyString(idString);
-                                savedLineNo = lineno;
+                                saved_name = copy_string(id_string);
+                                saved_lineno = lineno;
                         }
                   SEMI
                         {
-                                $$ = newDeclNode(VarK);
-                                $$->lineno = savedLineNo;
+                                $$ = new_decl_node(VarK);
+                                $$->lineno = saved_lineno;
                                 $$->child[0] = $1;
-                                $$->child[1] = newExprNode(IdK);
-                                $$->child[1]->attr.name = savedName;
+                                $$->child[1] = new_expr_node(IdK);
+                                $$->child[1]->attr.name = saved_name;
                                 $$->type = $1->type;
                         }
                 | type ID
                         {
-                                savedName = copyString(idString);
-                                savedLineNo = lineno;
+                                saved_name = copy_string(id_string);
+                                saved_lineno = lineno;
                         }
                   LBRAC NUM
                         {
-                                savedValue = copyValue(tokenString);
+                                saved_value = copy_value(token_string);
                         }
                   RBRAC SEMI
                         {
-                                $$ = newDeclNode(ArrayK);
-                                $$->lineno = savedLineNo;
+                                $$ = new_decl_node(ArrayK);
+                                $$->lineno = saved_lineno;
                                 $$->child[0] = $1;
-                                $$->child[1] = newExprNode(IdK);
-                                $$->child[1]->attr.name = savedName;
-                                $$->child[2] = newExprNode(ConstK);
-                                $$->child[2]->attr.val = savedValue;
+                                $$->child[1] = new_expr_node(IdK);
+                                $$->child[1]->attr.name = saved_name;
+                                $$->child[2] = new_expr_node(ConstK);
+                                $$->child[2]->attr.val = saved_value;
                                 $$->type = $1->type;
                         }
                 ;
 
 type            : INT
                         {
-                                $$ = newExprNode(TypeK);
+                                $$ = new_expr_node(TypeK);
                                 $$->type = Integer;
                         }
                 | VOID
                         {
-                                $$ = newExprNode(TypeK);
+                                $$ = new_expr_node(TypeK);
                                 $$->type = Void;
                         }
                 ;
 
 fun_decl        : type ID
                         {
-                                savedFunc = copyString(idString);
-                                savedLineNo = lineno;
+                                saved_func = copy_string(id_string);
+                                saved_lineno = lineno;
                         }
                   LPAREN params RPAREN comp_stmt
                         {
-                                $$ = newDeclNode(FunK);
-                                $$->lineno = savedLineNo;
+                                $$ = new_decl_node(FunK);
+                                $$->lineno = saved_lineno;
                                 $$->child[0] = $1;
-                                $$->child[1] = newExprNode(IdK);
-                                $$->child[1]->attr.name = savedFunc;
+                                $$->child[1] = new_expr_node(IdK);
+                                $$->child[1]->attr.name = saved_func;
                                 $$->child[2] = $5;
                                 $$->child[3] = $7;
                                 $$->type = $1->type;
@@ -160,28 +160,28 @@ param_list      : param_list COMMA param
 
 param           : type ID
                         {
-                                $$ = newDeclNode(VarK);
-                                $$->attr.name = copyString(idString);
+                                $$ = new_decl_node(VarK);
+                                $$->attr.name = copy_string(id_string);
                                 $$->lineno = lineno;
                                 $$->child[0] = $1;
-                                $$->child[1] = newExprNode(IdK);
+                                $$->child[1] = new_expr_node(IdK);
                                 $$->child[1]->attr.name =
-                                copyString(idString);
+                                copy_string(id_string);
                                 $$->type = $1->type;
                         }
                 | type ID
                         {
-                                savedName = copyString(idString);
-                                savedLineNo = lineno;
+                                saved_name = copy_string(id_string);
+                                saved_lineno = lineno;
                         }
                   LBRAC RBRAC
                         {
-                                $$ = newDeclNode(ArrayK);
-                                $$->lineno = savedLineNo;
+                                $$ = new_decl_node(ArrayK);
+                                $$->lineno = saved_lineno;
                                 $$->child[0] = $1;
-                                $$->child[1] = newExprNode(IdK);
-                                $$->child[1]->attr.name = savedName;
-                                $$->child[2] = newExprNode(ConstK);
+                                $$->child[1] = new_expr_node(IdK);
+                                $$->child[1]->attr.name = saved_name;
+                                $$->child[2] = new_expr_node(ConstK);
                                 $$->child[2]->attr.val = 0;
                                 $$->type = $1->type;
                         }
@@ -189,7 +189,7 @@ param           : type ID
 
 comp_stmt       : LCURLY local_decl stmt_list RCURLY
                         {
-                                $$ = newStmtNode(CompK);
+                                $$ = new_stmt_node(CompK);
                                 $$->child[0] = $2;
                                 $$->child[1] = $3;
                         }
@@ -265,13 +265,13 @@ expr_stmt       : expr SEMI
 
 select_stmt     : IF LPAREN expr RPAREN stmt
                         {
-                                $$ = newStmtNode(IfK);
+                                $$ = new_stmt_node(IfK);
                                 $$->child[0] = $3;
                                 $$->child[1] = $5;
                         }
                 | IF LPAREN expr RPAREN stmt ELSE stmt
                         {
-                                $$ = newStmtNode(IfK);
+                                $$ = new_stmt_node(IfK);
                                 $$->child[0] = $3;
                                 $$->child[1] = $5;
                                 $$->child[2] = $7;
@@ -280,7 +280,7 @@ select_stmt     : IF LPAREN expr RPAREN stmt
 
 iter_stmt       : WHILE LPAREN expr RPAREN stmt
                         {
-                                $$ = newStmtNode(WhileK);
+                                $$ = new_stmt_node(WhileK);
                                 $$->child[0] = $3;
                                 $$->child[1] = $5;
                         }
@@ -288,18 +288,18 @@ iter_stmt       : WHILE LPAREN expr RPAREN stmt
 
 return_stmt     : RETURN SEMI
                         {
-                                $$ = newStmtNode(ReturnK);
+                                $$ = new_stmt_node(ReturnK);
                         }
                 | RETURN expr SEMI
                         {
-                                $$ = newStmtNode(ReturnK);
+                                $$ = new_stmt_node(ReturnK);
                                 $$->child[0] = $2;
                         }
                 ;
 
 expr            : var ASSIGN expr
                         {
-                                $$ = newExprNode(OpK);
+                                $$ = new_expr_node(OpK);
                                 $$->attr.op = ASSIGN;
                                 $$->child[0] = $1;
                                 $$->child[1] = $3;
@@ -312,29 +312,29 @@ expr            : var ASSIGN expr
 
 var             : ID
                         {
-                                $$ = newExprNode(IdK);
-                                $$->attr.name = copyString(idString);
+                                $$ = new_expr_node(IdK);
+                                $$->attr.name = copy_string(id_string);
                                 $$->lineno = lineno;
                         }
                 | ID
                         {
-                                savedName = copyString(idString);
-                                savedLineNo = lineno;
+                                saved_name = copy_string(id_string);
+                                saved_lineno = lineno;
                         }
                   LBRAC expr RBRAC
                         {
-                                $$ = newExprNode(ArrSubK);
-                                $$->lineno = savedLineNo;
-                                $$->child[0] = newExprNode(IdK);
-                                $$->child[0]->attr.name = savedName;
+                                $$ = new_expr_node(ArrSubK);
+                                $$->lineno = saved_lineno;
+                                $$->child[0] = new_expr_node(IdK);
+                                $$->child[0]->attr.name = saved_name;
                                 $$->child[1] = $4;
                         }
                 ;
 
 simple_expr     : add_expr relop add_expr
                         {
-                                $$ = newExprNode(OpK);
-                                $$->attr.op = savedOp;
+                                $$ = new_expr_node(OpK);
+                                $$->attr.op = saved_op;
                                 $$->child[0] = $1;
                                 $$->child[1] = $3;
                         }
@@ -346,34 +346,34 @@ simple_expr     : add_expr relop add_expr
 
 relop           : GTE
                         {
-                                savedOp = GTE;
+                                saved_op = GTE;
                         }
                 | GT
                         {
-                                savedOp = GT;
+                                saved_op = GT;
                         }
                 | LTE
                         {
-                                savedOp = LTE;
+                                saved_op = LTE;
                         }
                 | LT
                         {
-                                savedOp = LT;
+                                saved_op = LT;
                         }
                 | EQ
                         {
-                                savedOp = EQ;
+                                saved_op = EQ;
                         }
                 | NEQ
                         {
-                                savedOp = NEQ;
+                                saved_op = NEQ;
                         }
                 ;
 
 add_expr        : add_expr addop term
                         {
-                                $$ = newExprNode(OpK);
-                                $$->attr.op = savedOp;
+                                $$ = new_expr_node(OpK);
+                                $$->attr.op = saved_op;
                                 $$->child[0] = $1;
                                 $$->child[1] = $3;
                         }
@@ -385,18 +385,18 @@ add_expr        : add_expr addop term
 
 addop           : PLUS
                         {
-                                savedOp = PLUS;
+                                saved_op = PLUS;
                         }
                 | MINUS
                         {
-                                savedOp = MINUS;
+                                saved_op = MINUS;
                         }
                 ;
 
 term            : term mulop factor
                         {
-                                $$ = newExprNode(OpK);
-                                $$->attr.op = savedOp;
+                                $$ = new_expr_node(OpK);
+                                $$->attr.op = saved_op;
                                 $$->child[0] = $1;
                                 $$->child[1] = $3;
                         }
@@ -408,11 +408,11 @@ term            : term mulop factor
 
 mulop           : TIMES
                         {
-                                savedOp = TIMES;
+                                saved_op = TIMES;
                         }
                 | OVER
                         {
-                                savedOp = OVER;
+                                saved_op = OVER;
                         }
                 ;
 
@@ -430,22 +430,22 @@ factor          : LPAREN expr RPAREN
                         }
                 | NUM
                         {
-                                $$ = newExprNode(ConstK);
-                                $$->attr.val = copyValue(tokenString);
+                                $$ = new_expr_node(ConstK);
+                                $$->attr.val = copy_value(token_string);
                         }
                 ;
 
 call            : ID
                         {
-                                savedName = copyString(idString);
-                                savedLineNo = lineno;
+                                saved_name = copy_string(id_string);
+                                saved_lineno = lineno;
                         }
                   LPAREN args RPAREN
                         {
-                                $$ = newExprNode(FunCallK);
-                                $$->lineno = savedLineNo;
-                                $$->child[0] = newExprNode(IdK);
-                                $$->child[0]->attr.name = savedName;
+                                $$ = new_expr_node(FunCallK);
+                                $$->lineno = saved_lineno;
+                                $$->child[0] = new_expr_node(IdK);
+                                $$->child[0]->attr.name = saved_name;
                                 $$->child[1] = $4;
                         }
                 ;
@@ -484,18 +484,18 @@ int yyerror(char *message)
 {
         fprintf(listing, "Syntax error at line %d: %s\n", lineno, message);
         fprintf(listing, "Current token: ");
-        printToken(yychar, tokenString);
+        print_token(yychar, token_string);
         Error = TRUE;
         return 0;
 }
 
 static int yylex(void)
 {
-        return getToken();
+        return get_token();
 }
 
-TreeNode *parse(void)
+node_t *parse(void)
 {
         yyparse();
-        return syntaxTree;
+        return syntax_tree;
 }

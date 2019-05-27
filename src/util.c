@@ -1,30 +1,30 @@
 #include "globals.h"
 #include "util.h"
 
-static char const *tokenName[] = {
+static char const *token_name[] = {
         "IF", "ELSE", "INT", "RETURN", "VOID", "WHILE",
         "ID", "NUM", "=", "==", "!=", "<", "<=", ">",
         ">=", "+", "-", "*", "/", "(", ")", "[", "]",
         "{", "}", ",", ";", "ERROR"
 };
 
-static char const *stmtName[] = {
+static char const *stmt_name[] = {
         "If", "Return", "While", "Compound"
 };
-static char const *declName[] = {
+static char const *decl_name[] = {
         "Variable", "Array", "Function"
 };
-static char const *typeName[] = {
+static char const *type_name[] = {
         "void", "int"
 };
 
-static int indentLevel = 0;
+static int indent_level = 0;
 
 /* 
- * Procedure printToken prints a token 
+ * Procedure print_token prints a token
  * and its lexeme to the listing file
  */
-void printToken(TokenType token, const char *tokenString)
+void print_token(token_t token, const char *token_string)
 { 
         switch (token) { 
         case IF:
@@ -56,11 +56,11 @@ void printToken(TokenType token, const char *tokenString)
         case ID:
         case ERROR:
                 fprintf(listing, "\t\t%s\t\t%s\n",
-                        tokenName[token-IF], tokenString);
+                        token_name[token-IF], token_string);
                 break;
         case ENDFILE:
                 fprintf(listing, "\t\t%s\t\t%s\n",
-                        "EOF", tokenString);
+                        "EOF", token_string);
                 break;
         default: /* should never happen */
                 fprintf(listing, "Unknown token: %d\n", token);
@@ -68,10 +68,10 @@ void printToken(TokenType token, const char *tokenString)
 }
 
 /*
- * Function copyString allocates and makes a new
+ * Function copy_string allocates and makes a new
  * copy of an existing string
  */
-char *copyString(char *s)
+char *copy_string(char *s)
 {
         if (!s)
                 return NULL;
@@ -85,25 +85,25 @@ char *copyString(char *s)
 }
 
 /*
- * Function copyValue calculates value of given string
+ * Function copy_value calculates value of given string
  * and returns its value
  */
-int copyValue(char *s)
+int copy_value(char *s)
 {
         return atoi(s);
 }
 
 /*
- * newStmtNode creates new statement node, initialize with given kind,
+ * new_stmt_node creates new statement node, initialize with given kind,
  * then return initialized node
  */
-TreeNode *newStmtNode(StmtKind kind)
+node_t *new_stmt_node(stmt_t kind)
 {
         /*
          * The conversion from void pointer to any other pointer type is
          * guaranteed by the C programming language
          */
-        TreeNode *t = malloc(sizeof(TreeNode));
+        node_t *t = malloc(sizeof(node_t));
         int i;
         if (!t) {
                 fprintf(listing, "Out of memory error at line %d\n", lineno);
@@ -119,12 +119,12 @@ TreeNode *newStmtNode(StmtKind kind)
 }
 
 /*
- * newExprNode creates new expression node, initialize with given kind,
+ * new_expr_node creates new expression node, initialize with given kind,
  * then return initialized node
  */
-TreeNode *newExprNode(ExprKind kind)
+node_t *new_expr_node(expr_t kind)
 {
-        TreeNode *t = malloc(sizeof(TreeNode));
+        node_t *t = malloc(sizeof(node_t));
         int i;
         if (!t) {
                 fprintf(listing, "Out of memory error at line %d\n", lineno);
@@ -140,12 +140,12 @@ TreeNode *newExprNode(ExprKind kind)
 }
 
 /*
- * newDeclNode creates new declaration node, initialize with given kind,
+ * new_decl_node creates new declaration node, initialize with given kind,
  * then return initialized node
  */
-TreeNode *newDeclNode(DeclKind kind)
+node_t *new_decl_node(decl_t kind)
 {
-        TreeNode *t = malloc(sizeof(TreeNode));
+        node_t *t = malloc(sizeof(node_t));
         int i;
         if (!t) {
                 fprintf(listing, "Out of memory error at line %d\n", lineno);
@@ -160,31 +160,31 @@ TreeNode *newDeclNode(DeclKind kind)
         return t;
 }
 
-/* printSpaces indents by printing spaces */
-static void printSpaces()
+/* print_spaces indents by printing spaces */
+static void print_spaces()
 {
         int i;
-        for (i = 0; i < indentLevel; i++)
+        for (i = 0; i < indent_level; i++)
                 fprintf(listing, "  ");
 }
 
 /*
- * procedure printTree prints a syntax tree to the 
+ * procedure print_tree prints a syntax tree to the
  * listing file using indentation to indicate subtrees
  */
-void printTree(TreeNode *curr)
+void print_tree(node_t *curr)
 {
         int i;
-        indentLevel += 1;
+        indent_level += 1;
         while (curr) {
-                printSpaces();
+                print_spaces();
                 if (curr->nodekind == DeclK) {
                         switch (curr->kind.decl) {
                         case VarK:
                         case ArrayK:
                         case FunK:
                                 fprintf(listing, "%s Declaration\n",
-                                                declName[curr->kind.decl]);
+                                                decl_name[curr->kind.decl]);
                                 break;
                         default:
                                 fprintf(listing, "Unknown DeclNode kind\n");
@@ -197,7 +197,7 @@ void printTree(TreeNode *curr)
                         case CompK:
                         case ReturnK:
                                 fprintf(listing, "%s\n",
-                                                stmtName[curr->kind.stmt]);
+                                                stmt_name[curr->kind.stmt]);
                                 break;
                         default:
                                 fprintf(listing, "Unknown StmtNode kind\n");
@@ -207,7 +207,7 @@ void printTree(TreeNode *curr)
                         switch (curr->kind.expr) {
                         case OpK:
                                 fprintf(listing, "Op: %s\n",
-                                                tokenName[curr->attr.op-IF]);
+                                                token_name[curr->attr.op-IF]);
                                 break;
                         case ConstK:
                                 fprintf(listing, "Const: %d\n",
@@ -219,7 +219,7 @@ void printTree(TreeNode *curr)
                                 break;
                         case TypeK:
                                 fprintf(listing, "Type: %s\n",
-                                                typeName[curr->type]);
+                                                type_name[curr->type]);
                                 break;
                         case FunCallK:
                                 fprintf(listing, "Call\n");
@@ -235,8 +235,8 @@ void printTree(TreeNode *curr)
                         fprintf(listing, "Unknown node kind\n");
                 }
                 for (i = 0; i < MAXCHILDREN; i++)
-                        printTree(curr->child[i]);
+                        print_tree(curr->child[i]);
                 curr = curr->sibling;
         }
-        indentLevel -= 1;
+        indent_level -= 1;
 }

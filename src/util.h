@@ -6,42 +6,42 @@
 #include <string.h>
 
 /*
- * Procedure printToken prints a token 
+ * Procedure print_token prints a token
  * and its lexeme to the listing file
  */
-void printToken(TokenType, const char *);
+void print_token(token_t, const char *);
 
 /*
- * Function copyString allocates and makes a new
+ * Function copy_string allocates and makes a new
  * copy of an existing string
  */
-char *copyString(char *);
+char *copy_string(char *);
 
 /*
- * Function copyValue calculates value of given string
+ * Function copy_value calculates value of given string
  * and returns its value
  */
-int copyValue(char *);
+int copy_value(char *);
 
 /*
- * newStmtNode creates new statement node, initialize with given kind,
+ * new_stmt_node creates new statement node, initialize with given kind,
  * then return initialized node
  */
-TreeNode *newStmtNode(StmtKind);
+node_t *new_stmt_node(stmt_t);
 /*
- * newExprNode creates new expression node, initialize with given kind,
+ * new_expr_node creates new expression node, initialize with given kind,
  * then return initialized node
  */
-TreeNode *newExprNode(ExprKind);
+node_t *new_expr_node(expr_t);
 /*
- * newDeclNode creates new declaration node, initialize with given kind,
+ * new_decl_node creates new declaration node, initialize with given kind,
  * then return initialized node
  */
-TreeNode *newDeclNode(DeclKind);
+node_t *new_decl_node(decl_t);
 
 /*
- * procedure printTree prints a syntax tree to the 
+ * procedure print_tree prints a syntax tree to the
  * listing file using indentation to indicate subtrees
  */
-void printTree(TreeNode *);
+void print_tree(node_t *);
 #endif

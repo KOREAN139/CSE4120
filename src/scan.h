@@ -6,9 +6,9 @@
 /* follow standard C identifier length */
 #define MAXTOKENLEN 31
 
-/* tokenString array stores the lexeme of each token */
-extern char tokenString[MAXTOKENLEN+1];
-/* tokenString array stores the lexeme of identifier token */
-extern char idString[MAXTOKENLEN+1];
+/* token_string array stores the lexeme of each token */
+extern char token_string[MAXTOKENLEN+1];
+/* token_string array stores the lexeme of identifier token */
+extern char id_string[MAXTOKENLEN+1];
 
 #endif
