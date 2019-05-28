@@ -8,6 +8,13 @@ static int scope_level;
 static int func_loc;
 static int func_comp;
 
+static void print_error_msg(char *name, int lineno)
+{
+        printf("Error in line %d : ", lineno);
+        printf("duplicated declaration of %s", name);
+        printf("\n\t\tfirst declared at line %d\n", lineno);
+}
+
 /*
  * Function update_symtab updates symbol table with current symbol
  * in t if any
@@ -17,7 +24,8 @@ static void _build_symbol_table(node_t *t)
         if (!t || Error)
                 return;
 
-        int i, diff, location;
+        int i, diff, location, ret;
+        int is_array = 0;
         int array_size = 0;
         node_t *node_ptr;
         symbol_type_t symbol_type;
@@ -66,33 +74,37 @@ static void _build_symbol_table(node_t *t)
                 break;
         case DeclK:
                 location = get_memory_location();
-                if (lookup_symbol(t->child[1]->attr.name) != -1) {
-                        Error = TRUE;
-                        printf("Error in line %d : duplicated declaration",
-                                        t->lineno);
-                        printf(" of %s\n\t\tfirst declared at line %d\n",
-                                        t->child[1]->attr.name, t->lineno);
-                        return;
-                }
                 switch (t->kind.decl) {
                 case ArrayK:
+                        is_array = TRUE;
                         array_size = t->child[2]->attr.val;
                 case VarK:
                         symbol_type = Var;
                         diff = 4 * (array_size + !array_size);
                         location += scope_level ? -diff : diff;
-                        insert_symbol(t->child[1]->attr.name, t->type,
-                                        symbol_type, array_size,
-                                        t->lineno, location);
+                        if (insert_symbol(t->child[1]->attr.name, t->type,
+                                        symbol_type, is_array, array_size,
+                                        t->lineno, location)) {
+                                Error = TRUE;
+                                print_error_msg(t->child[1]->attr.name,
+                                                t->lineno);
+                                return;
+                        }
 
                         update_memory_location(location);
                         _build_symbol_table(t->sibling);
                         break;
                 case FunK:
                         symbol_type = Func;
-                        insert_symbol(t->child[1]->attr.name, t->type,
-                                        symbol_type, array_size,
-                                        t->lineno, func_loc);
+                        if (insert_symbol(t->child[1]->attr.name, t->type,
+                                        symbol_type, is_array, array_size,
+                                        t->lineno, func_loc)) {
+                                Error = TRUE;
+                                print_error_msg(t->child[1]->attr.name,
+                                                t->lineno);
+                                return;
+                        }
+
                         func_loc += 1;
 
                         func_comp = 1;
@@ -109,10 +121,17 @@ static void _build_symbol_table(node_t *t)
                         symbol_type = Param;
                         node_ptr = t->child[2];
                         while (node_ptr) {
-                                insert_symbol(node_ptr->child[1]->attr.name,
+                                if (insert_symbol(node_ptr->child[1]->attr.name,
                                                 node_ptr->type, symbol_type,
+                                                node_ptr->kind.decl == ArrayK,
                                                 array_size, node_ptr->lineno,
-                                                location);
+                                                location)) {
+                                        Error = TRUE;
+                                        print_error_msg(t->child[1]->attr.name,
+                                                        t->lineno);
+                                        return;
+                                }
+
                                 location -= 4;
                                 node_ptr = node_ptr->sibling;
                         }
@@ -139,4 +158,8 @@ void build_symbol_table(node_t *tree)
         func_comp = 0;
         init_symbol_table();
         _build_symbol_table(tree);
+}
+
+void semantic_check(node_t *tree)
+{
 }

@@ -74,8 +74,8 @@ void parent_symbol_table()
         symtab_curr = symtab_curr->parent;
 }
 
-void insert_symbol(char *name, type_t type, symbol_type_t symbol_type,
-                int array_size, int lineno, int memloc)
+int insert_symbol(char *name, type_t type, symbol_type_t symbol_type,
+                int is_array, int array_size, int lineno, int memloc)
 {
         int index = hash(name);
         bucket_t *hash_table = symtab_curr->hash_table;
@@ -93,12 +93,16 @@ void insert_symbol(char *name, type_t type, symbol_type_t symbol_type,
                 curr->name = name;
                 curr->type = type;
                 curr->symbol_type = symbol_type;
+                curr->is_array = is_array;
                 curr->array_size = array_size;
                 curr->memloc = memloc;
                 curr->lines = line_info;
 
                 curr->next = hash_table[index];
                 hash_table[index] = curr;
+                return 0;
+        } else {
+                return curr->lines->lineno;
         }
 }
 
@@ -165,13 +169,16 @@ static void _print_symbol_table(FILE *listing, symtab_t t)
                 bucket_ptr = t->hash_table[i];
                 if (!bucket_ptr)
                         continue;
-                fprintf(listing, "%s\t%d\t%d\t%s\t%s\t%d\t%s\t",
+                fprintf(listing, "%s\t%d\t%d\t%s\t%s\t",
                                 bucket_ptr->name, t->scope,
                                 bucket_ptr->memloc,
                                 symbol_type_name[bucket_ptr->symbol_type],
-                                0 ? "Yes" : "No",
-                                bucket_ptr->array_size,
-                                type_name[bucket_ptr->type]);
+                                bucket_ptr->is_array ? "Yes" : "No");
+                if (bucket_ptr->is_array)
+                        fprintf(listing, "%d\t", bucket_ptr->array_size);
+                else
+                        fprintf(listing, "-\t");
+                fprintf(listing, "%s\t", type_name[bucket_ptr->type]);
                 line_ptr = bucket_ptr->lines;
                 while (line_ptr) {
                         fprintf(listing, "%d\t", line_ptr->lineno);

@@ -26,6 +26,7 @@ typedef struct _bucket_t {
         line_t lines;
         type_t type;
         symbol_type_t symbol_type;
+        int is_array;
         int array_size;
         int memloc;
         struct _bucket_t *next;
@@ -63,7 +64,7 @@ void update_memory_location(int);
 /*
  * insert_symbol inserts variable into symbol table
  */
-void insert_symbol(char *, type_t, symbol_type_t, int, int, int);
+int insert_symbol(char *, type_t, symbol_type_t, int, int, int, int);
 
 /*
  * add_symbol_line add line number to given variable
