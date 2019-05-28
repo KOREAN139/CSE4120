@@ -133,7 +133,7 @@ void add_symbol_line(char *name, int lineno)
         }
 }
 
-int lookup_symbol(char *name)
+bucket_t lookup_symbol(char *name)
 {
         int index = hash(name);
         symtab_t tab_ptr = symtab_curr;
@@ -150,7 +150,7 @@ int lookup_symbol(char *name)
                 tab_ptr = tab_ptr->parent;
         }
 
-        return curr ? curr->memloc : -1;
+        return curr;
 }
 
 static void _print_symbol_table(FILE *listing, symtab_t t)

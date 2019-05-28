@@ -56,7 +56,7 @@ static void _build_symbol_table(node_t *t)
         case ExprK:
                 switch (t->kind.expr) {
                 case IdK:
-                        if (lookup_symbol(t->attr.name) == -1) {
+                        if (!lookup_symbol(t->attr.name)) {
                                 // current variable is not visible in scope
                                 Error = TRUE;
                                 printf("Error in line %d : %s not exist\n",

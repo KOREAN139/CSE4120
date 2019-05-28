@@ -74,7 +74,7 @@ void add_symbol_line(char *, int);
 /*
  * lookup_symbol finds given variable's memory location
  */
-int lookup_symbol(char *);
+bucket_t lookup_symbol(char *);
 
 /*
  * print symbol table with formatting
