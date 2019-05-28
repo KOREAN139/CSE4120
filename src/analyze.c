@@ -2,42 +2,22 @@
 #include "globals.h"
 #include "symtab.h"
 
-static int location;
-static int func_loc;
-static int scope_level;
+extern int Error;
 
-/*
- * Function traverse traverses given tree, executes given
- * pre-procedure & post-procedure functions
- */
-static void traverse(node_t *t,
-                void (*pre_proc)(node_t *),
-                void (*post_proc)(node_t *))
-{
-        int i, local_loc;
-        if (t) {
-                local_loc = location;
-                if (pre_proc)
-                        pre_proc(t);
-                for (i = 0; i < MAXCHILDREN; ++i)
-                        traverse(t->child[i], pre_proc, post_proc);
-                if (post_proc)
-                        post_proc(t);
-                if (scope_level) {
-                        scope_level -= 1;
-                        parent_symbol_table();
-                }
-                location = local_loc;
-                traverse(t->sibling, pre_proc, post_proc);
-        }
-}
+static int scope_level;
+static int func_loc;
+static int func_comp;
 
 /*
  * Function update_symtab updates symbol table with current symbol
  * in t if any
  */
-static void update_symtab(node_t *t)
+static void _build_symbol_table(node_t *t)
 {
+        if (!t || Error)
+                return;
+
+        int i, diff, location;
         int array_size = 0;
         node_t *node_ptr;
         symbol_type_t symbol_type;
@@ -46,10 +26,22 @@ static void update_symtab(node_t *t)
         case StmtK:
                 switch (t->kind.stmt) {
                 case CompK:
-                        child_symbol_table();
-                        scope_level += 1;
+                        if (!func_comp) {
+                                location = get_memory_location();
+                                child_symbol_table();
+                                update_memory_location(location);
+                                scope_level += 1;
+                        }
+                        func_comp = 0;
+                        for (i = 0; i < MAXCHILDREN; i++)
+                                _build_symbol_table(t->child[i]);
+                        parent_symbol_table();
+                        scope_level -= 1;
                         break;
                 default:
+                        for (i = 0; i < MAXCHILDREN; i++)
+                                _build_symbol_table(t->child[i]);
+                        _build_symbol_table(t->sibling);
                         break;
                 }
                 break;
@@ -58,24 +50,43 @@ static void update_symtab(node_t *t)
                 case IdK:
                         if (lookup_symbol(t->attr.name) == -1) {
                                 // current variable is not visible in scope
+                                Error = TRUE;
+                                printf("Error in line %d : %s not exist\n",
+                                                t->lineno, t->attr.name);
+                                break;
                         }
+                        add_symbol_line(t->attr.name, t->lineno);
                         break;
                 default:
+                        for (i = 0; i < MAXCHILDREN; i++)
+                                _build_symbol_table(t->child[i]);
+                        _build_symbol_table(t->sibling);
                         break;
                 }
                 break;
         case DeclK:
+                location = get_memory_location();
+                if (lookup_symbol(t->child[1]->attr.name) != -1) {
+                        Error = TRUE;
+                        printf("Error in line %d : duplicated declaration",
+                                        t->lineno);
+                        printf(" of %s\n\t\tfirst declared at line %d\n",
+                                        t->child[1]->attr.name, t->lineno);
+                        return;
+                }
                 switch (t->kind.decl) {
                 case ArrayK:
                         array_size = t->child[2]->attr.val;
                 case VarK:
                         symbol_type = Var;
-                        location -= 4 * array_size;
-                        if (!array_size)
-                                location -= 4;
+                        diff = 4 * (array_size + !array_size);
+                        location += scope_level ? -diff : diff;
                         insert_symbol(t->child[1]->attr.name, t->type,
                                         symbol_type, array_size,
                                         t->lineno, location);
+
+                        update_memory_location(location);
+                        _build_symbol_table(t->sibling);
                         break;
                 case FunK:
                         symbol_type = Func;
@@ -84,19 +95,33 @@ static void update_symtab(node_t *t)
                                         t->lineno, func_loc);
                         func_loc += 1;
 
+                        func_comp = 1;
+                        child_symbol_table();
+                        scope_level += 1;
+
                         location = 0;
                         node_ptr = t->child[2];
+                        while (node_ptr) {
+                                location += 4;
+                                node_ptr = node_ptr->sibling;
+                        }
+
                         symbol_type = Param;
+                        node_ptr = t->child[2];
                         while (node_ptr) {
                                 insert_symbol(node_ptr->child[1]->attr.name,
                                                 node_ptr->type, symbol_type,
                                                 array_size, node_ptr->lineno,
                                                 location);
-                                location += 4;
+                                location -= 4;
                                 node_ptr = node_ptr->sibling;
                         }
 
                         location = -4;
+                        update_memory_location(location);
+
+                        _build_symbol_table(t->child[3]);
+                        _build_symbol_table(t->sibling);
                         break;
                 default:
                         break;
@@ -109,9 +134,9 @@ static void update_symtab(node_t *t)
 
 void build_symbol_table(node_t *tree)
 {
-        location = 0;
-        func_loc = 0;
         scope_level = 0;
+        func_loc = 0;
+        func_comp = 0;
         init_symbol_table();
-        traverse(tree, update_symtab, NULL);
+        _build_symbol_table(tree);
 }

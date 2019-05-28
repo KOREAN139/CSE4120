@@ -34,6 +34,7 @@ typedef struct _bucket_t {
 /* structure for symbol table */
 typedef struct _symtab_t {
         int scope;
+        int memory_location;
         bucket_t *hash_table;
         struct _symtab_t *parent;
         struct _symtab_t *child;
@@ -43,15 +44,31 @@ typedef struct _symtab_t {
 /* init_symbol_table initialize symbol table */
 void init_symbol_table();
 
+/*
+ * child_symbol_table creates new symbol table & links as child
+ * to current symbol table
+ * move current symbol table pointer to child
+ */
 void child_symbol_table();
+
+/* parent_symbol_table moves current symbol table pointer to parent */
 void parent_symbol_table();
 
+/* get_memory_location returns memory location of current symbol table */
+int get_memory_location();
+
+/* update_memory_location updates memory location of current symbol table */
+void update_memory_location(int);
+
 /*
- * insert_symbol inserts current variable into symbol table
- * memory location is inserted only the first time
- * otherwise, it's ignored
+ * insert_symbol inserts variable into symbol table
  */
 void insert_symbol(char *, type_t, symbol_type_t, int, int, int);
+
+/*
+ * add_symbol_line add line number to given variable
+ */
+void add_symbol_line(char *, int);
 
 /*
  * lookup_symbol finds given variable's memory location

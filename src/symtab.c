@@ -21,10 +21,10 @@ static char const *symbol_type_name[] = {
  */
 static int hash(char *key)
 {
-        int i, ret;
-        for (i = ret = 1; *key++; ++i) {
+        int ret = 0;
+        while (*key) {
                 ret *= POWER;
-                ret += *key;
+                ret += *key++;
         }
         return ret % BASE;
 }
@@ -37,7 +37,8 @@ static symtab_t create_symbol_table()
 {
         symtab_t new = malloc(sizeof(struct _symtab_t));
         new->scope = scope_level;
-        new->hash_table = malloc(sizeof(bucket_t) * BUCKET_SIZE);
+        new->memory_location = 0;
+        new->hash_table = calloc(BUCKET_SIZE, sizeof(bucket_t));
         new->parent = NULL;
         new->child = NULL;
         new->sibling = NULL;
@@ -90,12 +91,35 @@ void insert_symbol(char *name, type_t type, symbol_type_t symbol_type,
         if (!curr) {
                 curr = malloc(sizeof(struct _bucket_t));
                 curr->name = name;
+                curr->type = type;
+                curr->symbol_type = symbol_type;
+                curr->array_size = array_size;
                 curr->memloc = memloc;
                 curr->lines = line_info;
 
                 curr->next = hash_table[index];
                 hash_table[index] = curr;
-        } else {
+        }
+}
+
+void add_symbol_line(char *name, int lineno)
+{
+        int index = hash(name);
+        symtab_t symtab_ptr = symtab_curr;
+        bucket_t curr = NULL;
+
+        line_t line_info = malloc(sizeof(struct _line_t));
+        line_info->lineno = lineno;
+        line_info->next = NULL;
+
+        while (!curr && symtab_ptr) {
+                curr = symtab_ptr->hash_table[index];
+                while (curr && strcmp(name, curr->name))
+                        curr = curr->next;
+                symtab_ptr = symtab_ptr->parent;
+        }
+
+        if (curr) {
                 line_t t = curr->lines;
 
                 while (t->next)
@@ -114,8 +138,7 @@ int lookup_symbol(char *name)
         curr = NULL;
 
         while (tab_ptr && !curr) {
-                hash_table = symtab_curr->hash_table;
-                curr = hash_table[index];
+                curr = tab_ptr->hash_table[index];
 
                 while (curr && strcmp(name, curr->name))
                         curr = curr->next;
@@ -126,6 +149,50 @@ int lookup_symbol(char *name)
         return curr ? curr->memloc : -1;
 }
 
+static void _print_symbol_table(FILE *listing, symtab_t t)
+{
+        int i;
+        line_t line_ptr;
+        bucket_t bucket_ptr;
+        symtab_t symtab_ptr = t->child;
+        while (symtab_ptr) {
+                _print_symbol_table(listing, symtab_ptr);
+                symtab_ptr = symtab_ptr->sibling;
+        }
+        fprintf(listing, "Name\tScope\tLoc\tV/P/F\tArray?\t%s",
+                        "ArrSize\tType\tLine Numbers\n");
+        for (i = 0; i < BUCKET_SIZE; i++) {
+                bucket_ptr = t->hash_table[i];
+                if (!bucket_ptr)
+                        continue;
+                fprintf(listing, "%s\t%d\t%d\t%s\t%s\t%d\t%s\t",
+                                bucket_ptr->name, t->scope,
+                                bucket_ptr->memloc,
+                                symbol_type_name[bucket_ptr->symbol_type],
+                                0 ? "Yes" : "No",
+                                bucket_ptr->array_size,
+                                type_name[bucket_ptr->type]);
+                line_ptr = bucket_ptr->lines;
+                while (line_ptr) {
+                        fprintf(listing, "%d\t", line_ptr->lineno);
+                        line_ptr = line_ptr->next;
+                }
+                puts("");
+        }
+        puts("");
+}
+
+int get_memory_location()
+{
+        return symtab_curr->memory_location;
+}
+
+void update_memory_location(int location)
+{
+        symtab_curr->memory_location = location;
+}
+
 void print_symbol_table(FILE *listing)
 {
+        _print_symbol_table(listing, symtab_head);
 }

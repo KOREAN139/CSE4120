@@ -1,5 +1,6 @@
 #include "globals.h"
 #include "util.h"
+#include "symtab.h"
 #include "analyze.h"
 
 /* allocate global variables */
@@ -34,6 +35,8 @@ int main(int argc, char *argv[])
         listing = stdout;
         syntax_tree = parse();
         build_symbol_table(syntax_tree);
+        if (!Error)
+                print_symbol_table(listing);
         /* Do build symbol table, check types */
         fclose(source);
         return 0;
