@@ -60,13 +60,13 @@ typedef enum {
 typedef enum {
         OpK, ConstK, IdK, TypeK, FunCallK, ArrSubK
 } expr_t;
-/* specify declaration's kind*/
+/* specify declaration's kind */
 typedef enum {
         VarK, ArrayK, FunK
 } decl_t;
 /* specify expression's type */
 typedef enum {
-        Void, Integer
+        Void, Integer, Array
 } type_t;
 
 #define MAXCHILDREN 4

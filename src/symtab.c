@@ -4,6 +4,12 @@
 /* symbol table implemented with hash table */
 static symtab_t symtab_head, symtab_curr;
 static int scope_level;
+static char const *type_name[] = {
+        "void", "int", "array"
+};
+static char const *symbol_type_name[] = {
+        "var", "func", "param"
+};
 
 #define INCREASE_LEVEL (scope_level += 1)
 #define DECREASE_LEVEL (scope_level -= 1)
@@ -45,13 +51,30 @@ void init_symbol_table()
         symtab_curr = symtab_head;
 }
 
+void child_symbol_table()
+{
+        INCREASE_LEVEL;
+        symtab_t child = create_symbol_table();
+        child->parent = symtab_curr;
+        if (!symtab_curr->child) {
+                symtab_curr->child = child;
+        } else {
+                symtab_t symtab_ptr = symtab_curr->child;
+                while (symtab_ptr->sibling)
+                        symtab_ptr = symtab_ptr->sibling;
+                symtab_ptr->sibling = child;
+        }
+        symtab_curr = child;
+}
+
 void parent_symbol_table()
 {
         DECREASE_LEVEL;
         symtab_curr = symtab_curr->parent;
 }
 
-void insert_symbol(char *name, int lineno, int memloc)
+void insert_symbol(char *name, type_t type, symbol_type_t symbol_type,
+                int array_size, int lineno, int memloc)
 {
         int index = hash(name);
         bucket_t *hash_table = symtab_curr->hash_table;

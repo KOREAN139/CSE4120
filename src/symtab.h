@@ -3,10 +3,16 @@
 
 #include <string.h>
 #include <stdlib.h>
+#include "globals.h"
 
 #define POWER 139
 #define BASE 211
 #define BUCKET_SIZE BASE
+
+/* specify symbol's type */
+typedef enum {
+        Var, Func, Param
+} symbol_type_t;
 
 /* structure for tracing variable's referenced location */
 typedef struct _line_t {
@@ -18,6 +24,9 @@ typedef struct _line_t {
 typedef struct _bucket_t {
         char *name;
         line_t lines;
+        type_t type;
+        symbol_type_t symbol_type;
+        int array_size;
         int memloc;
         struct _bucket_t *next;
 } *bucket_t;
@@ -34,12 +43,15 @@ typedef struct _symtab_t {
 /* init_symbol_table initialize symbol table */
 void init_symbol_table();
 
+void child_symbol_table();
+void parent_symbol_table();
+
 /*
  * insert_symbol inserts current variable into symbol table
  * memory location is inserted only the first time
  * otherwise, it's ignored
  */
-void insert_symbol(char *, int, int);
+void insert_symbol(char *, type_t, symbol_type_t, int, int, int);
 
 /*
  * lookup_symbol finds given variable's memory location

@@ -1,5 +1,6 @@
 #include "globals.h"
 #include "util.h"
+#include "analyze.h"
 
 /* allocate global variables */
 int lineno = 0;
@@ -32,10 +33,7 @@ int main(int argc, char *argv[])
         /* send listing to screen */
         listing = stdout;
         syntax_tree = parse();
-        if (!Error) {
-                fprintf(listing, "\nSyntax tree:\n");
-                print_tree(syntax_tree);
-        }
+        build_symbol_table(syntax_tree);
         /* Do build symbol table, check types */
         fclose(source);
         return 0;

@@ -1,8 +1,8 @@
 CC = gcc
 
-CFLAGS =
+CFLAGS = -g
 
-OBJS = lex.yy.o tiny.tab.o main.o util.o
+OBJS = lex.yy.o tiny.tab.o main.o util.o symtab.o analyze.o
 
 20151623: $(OBJS)
 	$(CC) $(CFLAGS) $(OBJS) -o 20151623
@@ -12,6 +12,12 @@ main.o: main.c globals.h util.h
 
 util.o: util.c util.h globals.h
 	$(CC) $(CFLAGS) -c util.c
+
+symtab.o: symtab.c symtab.h globals.h
+	$(CC) $(CFLAGS) -c symtab.c
+
+analyze.o: analyze.c analyze.h globals.h
+	$(CC) $(CFLAGS) -c analyze.c
 
 tiny.tab.o: tiny.tab.c
 	$(CC) $(CFLAGS) -c tiny.tab.c
