@@ -22,7 +22,7 @@ static char const *symbol_type_name[] = {
 static int hash(char *key)
 {
         int i, ret;
-        for (i = ret = 1; *key; ++i) {
+        for (i = ret = 1; *key++; ++i) {
                 ret *= POWER;
                 ret += *key;
         }
