@@ -180,7 +180,7 @@ static void _semantic_check(node_t *t)
                 case IfK:
                         t1 = t->child[0]->type;
                         if (t1 != Integer) {
-                                Error = True;
+                                Error = TRUE;
                                 printf("Error in line %d: ", t->lineno);
                                 printf("Condition statement must be INTEGER");
                                 break;
@@ -192,7 +192,7 @@ static void _semantic_check(node_t *t)
                 case WhileK:
                         t1 = t->child[0]->type;
                         if (t1 != Integer) {
-                                Error = True;
+                                Error = TRUE;
                                 printf("Error in line %d: ", t->lineno);
                                 printf("Condition statement must be INTEGER");
                                 break;
@@ -211,14 +211,14 @@ static void _semantic_check(node_t *t)
                         t2 = t->child[1]->type;
 
                         if (t1 != t2) {
-                                Error = True;
+                                Error = TRUE;
                                 printf("Error in line %d: ", t->lineno);
                                 printf("Operation between different types");
                                 break;
                         }
 
                         if (t1 != Integer || t2 != Integer) {
-                                Error = True;
+                                Error = TRUE;
                                 printf("Error in line %d: ", t->lineno);
                                 printf("Operation with non-integer variable");
                                 break;
@@ -231,7 +231,7 @@ static void _semantic_check(node_t *t)
                         break;
                 case IdK:
                         if (t->child[1]) {
-                                Error = True;
+                                Error = TRUE;
                                 printf("Error in line %d: ", t->lineno);
                                 printf("Using non-array variable as array");
                                 break;
@@ -244,7 +244,7 @@ static void _semantic_check(node_t *t)
                 case ArrSubK:
                         t1 = t->child[1]->type;
                         if (t1 != Integer) {
-                                Error = True;
+                                Error = TRUE;
                                 printf("Error in line %d: ", t->lineno);
                                 printf("Array index must be INTEGER");
                                 break;
@@ -262,7 +262,7 @@ static void _semantic_check(node_t *t)
                 case VarK:
                         t1 = t->child[0]->type;
                         if (t1 == Void) {
-                                Error = True;
+                                Error = TRUE;
                                 printf("Error in line %d: ", t->lineno);
                                 printf("Variable cannot be VOID");
                                 break;
@@ -272,20 +272,20 @@ static void _semantic_check(node_t *t)
                         t1 = t->child[0]->type;
                         if (!strcmp("main", t->child[1]->attr.name)) {
                                 if (t1 != Void) {
-                                        Error = True;
+                                        Error = TRUE;
                                         printf("Error in line %d: ", t->lineno);
                                         printf("main function must be VOID");
                                         break;
                                 }
                                 if (t->child[2]) {
-                                        Error = True;
+                                        Error = TRUE;
                                         printf("Error in line %d: ", t->lineno);
                                         printf("main function must have no");
                                         printf("parameter");
                                         break;
                                 }
                                 if (t->sibling) {
-                                        Error = True;
+                                        Error = TRUE;
                                         printf("Error in line %d: ", t->lineno);
                                         printf("main function must be located");
                                         printf("at the end");
