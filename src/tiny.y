@@ -11,7 +11,9 @@ static char *saved_name;
 static char *saved_func;
 static int saved_lineno;
 static int saved_value;
-static int saved_op;
+static int saved_rel_op;
+static int saved_add_op;
+static int saved_mul_op;
 static node_t *syntax_tree;
 
 int yyerror(char *);
@@ -334,7 +336,7 @@ var             : ID
 simple_expr     : add_expr relop add_expr
                         {
                                 $$ = new_expr_node(OpK);
-                                $$->attr.op = saved_op;
+                                $$->attr.op = saved_rel_op;
                                 $$->child[0] = $1;
                                 $$->child[1] = $3;
                         }
@@ -346,34 +348,34 @@ simple_expr     : add_expr relop add_expr
 
 relop           : GTE
                         {
-                                saved_op = GTE;
+                                saved_rel_op = GTE;
                         }
                 | GT
                         {
-                                saved_op = GT;
+                                saved_rel_op = GT;
                         }
                 | LTE
                         {
-                                saved_op = LTE;
+                                saved_rel_op = LTE;
                         }
                 | LT
                         {
-                                saved_op = LT;
+                                saved_rel_op = LT;
                         }
                 | EQ
                         {
-                                saved_op = EQ;
+                                saved_rel_op = EQ;
                         }
                 | NEQ
                         {
-                                saved_op = NEQ;
+                                saved_rel_op = NEQ;
                         }
                 ;
 
 add_expr        : add_expr addop term
                         {
                                 $$ = new_expr_node(OpK);
-                                $$->attr.op = saved_op;
+                                $$->attr.op = saved_add_op;
                                 $$->child[0] = $1;
                                 $$->child[1] = $3;
                         }
@@ -385,18 +387,18 @@ add_expr        : add_expr addop term
 
 addop           : PLUS
                         {
-                                saved_op = PLUS;
+                                saved_add_op = PLUS;
                         }
                 | MINUS
                         {
-                                saved_op = MINUS;
+                                saved_add_op = MINUS;
                         }
                 ;
 
 term            : term mulop factor
                         {
                                 $$ = new_expr_node(OpK);
-                                $$->attr.op = saved_op;
+                                $$->attr.op = saved_mul_op;
                                 $$->child[0] = $1;
                                 $$->child[1] = $3;
                         }
@@ -408,11 +410,11 @@ term            : term mulop factor
 
 mulop           : TIMES
                         {
-                                saved_op = TIMES;
+                                saved_mul_op = TIMES;
                         }
                 | OVER
                         {
-                                saved_op = OVER;
+                                saved_mul_op = OVER;
                         }
                 ;
 
