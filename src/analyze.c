@@ -68,12 +68,7 @@ static void _build_symbol_table(node_t *t)
                         }
                         add_symbol_line(t->attr.name, t->lineno);
                         t->type = bucket_ptr->type;
-                        if (bucket_ptr->symbol_type == Var)
-                                t->decl_type = VarK;
-                        if (bucket_ptr->is_array)
-                                t->decl_type = ArrayK;
-                        if (bucket_ptr->symbol_type == Func)
-                                t->decl_type = FunK;
+                        t->def_ptr = bucket_ptr->def_ptr;
                         break;
                 default:
                         for (i = 0; i < MAXCHILDREN; i++)
@@ -181,6 +176,7 @@ static void _semantic_check(node_t *t)
                 return;
 
         type_t t1, t2;
+        node_t *node_ptr;
 
         switch (t->nodekind) {
         case StmtK:
@@ -240,7 +236,8 @@ static void _semantic_check(node_t *t)
                 case IdK:
                         break;
                 case FunCallK:
-                        if (t->child[0]->decl_type != FunK) {
+                        node_ptr = t->child[0]->def_ptr;
+                        if (node_ptr->kind.decl != FunK) {
                                 Error = TRUE;
                                 printf("Error in line %d: ", t->lineno);
                                 puts("Using non-function as function");
@@ -251,7 +248,8 @@ static void _semantic_check(node_t *t)
                         t->type = t->child[0]->type;
                         break;
                 case ArrSubK:
-                        if (t->child[0]->decl_type != ArrayK) {
+                        node_ptr = t->child[0]->def_ptr;
+                        if (node_ptr->kind.decl != ArrayK) {
                                 Error = TRUE;
                                 printf("Error in line %d: ", t->lineno);
                                 puts("Using non-array variable as array");

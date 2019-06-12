@@ -87,7 +87,7 @@ typedef struct _node_t {
                 char *name;
         } attr;
         type_t type;
-        decl_t decl_type;
+        struct _node_t *def_ptr;
 } node_t;
 
 /* 

@@ -29,6 +29,7 @@ typedef struct _bucket_t {
         int is_array;
         int array_size;
         int memloc;
+        struct _node_t *def_ptr;
         struct _bucket_t *next;
 } *bucket_t;
 
