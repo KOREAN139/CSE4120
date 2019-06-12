@@ -68,6 +68,12 @@ static void _build_symbol_table(node_t *t)
                         }
                         add_symbol_line(t->attr.name, t->lineno);
                         t->type = bucket_ptr->type;
+                        if (bucket_ptr->symbol_type == Var)
+                                t->decl_type = VarK;
+                        if (bucket_ptr->is_array)
+                                t->decl_type = ArrayK;
+                        if (bucket_ptr->symbol_type == Func)
+                                t->decl_type = FunK;
                         break;
                 default:
                         for (i = 0; i < MAXCHILDREN; i++)
