@@ -64,7 +64,7 @@ void update_memory_location(int);
 /*
  * insert_symbol inserts variable into symbol table
  */
-int insert_symbol(char *, type_t, symbol_type_t, int, int, int, int);
+int insert_symbol(node_t *, symbol_type_t, int, int, int);
 
 /*
  * add_symbol_line add line number to given variable

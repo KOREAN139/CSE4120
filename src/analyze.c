@@ -92,9 +92,8 @@ static void _build_symbol_table(node_t *t)
                         symbol_type = Var;
                         diff = 4 * (array_size + !array_size);
                         location += scope_level ? -diff : diff;
-                        if (insert_symbol(t->child[1]->attr.name, t->type,
-                                        symbol_type, is_array, array_size,
-                                        t->lineno, location)) {
+                        if (insert_symbol(t, symbol_type, is_array,
+                                                array_size, location)) {
                                 Error = TRUE;
                                 print_error_msg(t->child[1]->attr.name,
                                                 t->lineno);
@@ -106,9 +105,8 @@ static void _build_symbol_table(node_t *t)
                         break;
                 case FunK:
                         symbol_type = Func;
-                        if (insert_symbol(t->child[1]->attr.name, t->type,
-                                        symbol_type, is_array, array_size,
-                                        t->lineno, func_loc)) {
+                        if (insert_symbol(t, symbol_type, is_array,
+                                                array_size, func_loc)) {
                                 Error = TRUE;
                                 print_error_msg(t->child[1]->attr.name,
                                                 t->lineno);
@@ -131,11 +129,9 @@ static void _build_symbol_table(node_t *t)
                         symbol_type = Param;
                         node_ptr = t->child[2];
                         while (node_ptr) {
-                                if (insert_symbol(node_ptr->child[1]->attr.name,
-                                                node_ptr->type, symbol_type,
+                                if (insert_symbol(node_ptr, symbol_type,
                                                 node_ptr->kind.decl == ArrayK,
-                                                array_size, node_ptr->lineno,
-                                                location)) {
+                                                array_size, location)) {
                                         Error = TRUE;
                                         print_error_msg(t->child[1]->attr.name,
                                                         t->lineno);

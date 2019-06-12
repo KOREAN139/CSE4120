@@ -74,15 +74,16 @@ void parent_symbol_table()
         symtab_curr = symtab_curr->parent;
 }
 
-int insert_symbol(char *name, type_t type, symbol_type_t symbol_type,
-                int is_array, int array_size, int lineno, int memloc)
+int insert_symbol(node_t *t, symbol_type_t symbol_type,
+                int is_array, int array_size, int memloc)
 {
+        char *name = t->child[1]->attr.name;
         int index = hash(name);
         bucket_t *hash_table = symtab_curr->hash_table;
         bucket_t curr = hash_table[index];
         
         line_t line_info = malloc(sizeof(struct _line_t));
-        line_info->lineno = lineno;
+        line_info->lineno = t->lineno;
         line_info->next = NULL;
 
         while (curr && strcmp(name, curr->name))
@@ -91,7 +92,7 @@ int insert_symbol(char *name, type_t type, symbol_type_t symbol_type,
         if (!curr) {
                 curr = malloc(sizeof(struct _bucket_t));
                 curr->name = name;
-                curr->type = type;
+                curr->type = t->type;
                 curr->symbol_type = symbol_type;
                 curr->is_array = is_array;
                 curr->array_size = array_size;
