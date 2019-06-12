@@ -30,6 +30,7 @@ static void _build_symbol_table(node_t *t)
         int is_array = 0;
         int array_size = 0;
         node_t *node_ptr;
+        bucket_t bucket_ptr;
         symbol_type_t symbol_type;
 
         switch (t->nodekind) {
@@ -58,7 +59,7 @@ static void _build_symbol_table(node_t *t)
         case ExprK:
                 switch (t->kind.expr) {
                 case IdK:
-                        if (!lookup_symbol(t->attr.name)) {
+                        if (!(bucket_ptr = lookup_symbol(t->attr.name))) {
                                 // current variable is not visible in scope
                                 Error = TRUE;
                                 printf("Error in line %d : %s not exist\n",
@@ -66,6 +67,7 @@ static void _build_symbol_table(node_t *t)
                                 break;
                         }
                         add_symbol_line(t->attr.name, t->lineno);
+                        t->type = bucket_ptr->type;
                         break;
                 default:
                         for (i = 0; i < MAXCHILDREN; i++)
@@ -244,6 +246,7 @@ static void _semantic_check(node_t *t)
                 case FunCallK:
                         // check whether it's function or not
                         // check parameters
+                        t->type = t->child[0]->type;
                         break;
                 case ArrSubK:
                         t1 = t->child[1]->type;
