@@ -242,19 +242,26 @@ static void _semantic_check(node_t *t)
                         t->type = Integer;
                         break;
                 case IdK:
-                        if (t->child[1]) {
+                        break;
+                case FunCallK:
+                        if (t->child[0]->decl_type != FunK) {
+                                Error = TRUE;
+                                printf("Error in line %d: ", t->lineno);
+                                puts("Using non-function as function");
+                                break;
+                        }
+
+                        // check parameters
+                        t->type = t->child[0]->type;
+                        break;
+                case ArrSubK:
+                        if (t->child[0]->decl_type != ArrayK) {
                                 Error = TRUE;
                                 printf("Error in line %d: ", t->lineno);
                                 puts("Using non-array variable as array");
                                 break;
                         }
-                        break;
-                case FunCallK:
-                        // check whether it's function or not
-                        // check parameters
-                        t->type = t->child[0]->type;
-                        break;
-                case ArrSubK:
+
                         t1 = t->child[1]->type;
                         if (t1 != Integer) {
                                 Error = TRUE;
