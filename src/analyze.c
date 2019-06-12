@@ -2,6 +2,8 @@
 #include "globals.h"
 #include "symtab.h"
 
+#include <string.h>
+
 extern int Error;
 
 static int scope_level;
@@ -160,6 +162,148 @@ void build_symbol_table(node_t *tree)
         _build_symbol_table(tree);
 }
 
+static void _semantic_check(node_t *t)
+{
+        if (!t || Error)
+                return;
+
+        int i;
+        type_t t1, t2;
+
+        for (i = 0; i < MAXCHILDREN; i++)
+                _semantic_check(t->child[i]);
+        _semantic_check(t->sibling);
+
+        switch (t->nodekind) {
+        case StmtK:
+                switch (t->kind.stmt) {
+                case IfK:
+                        t1 = t->child[0]->type;
+                        if (t1 != Integer) {
+                                Error = True;
+                                printf("Error in line %d: ", t->lineno);
+                                printf("Condition statement must be INTEGER");
+                                break;
+                        }
+                        break;
+                case ReturnK:
+                        // check function return type & its type
+                        break;
+                case WhileK:
+                        t1 = t->child[0]->type;
+                        if (t1 != Integer) {
+                                Error = True;
+                                printf("Error in line %d: ", t->lineno);
+                                printf("Condition statement must be INTEGER");
+                                break;
+                        }
+                        break;
+                case CompK:
+                        break;
+                default:
+                        break;
+                }
+                break;
+        case ExprK:
+                switch (t->kind.expr) {
+                case OpK:
+                        t1 = t->child[0]->type;
+                        t2 = t->child[1]->type;
+
+                        if (t1 != t2) {
+                                Error = True;
+                                printf("Error in line %d: ", t->lineno);
+                                printf("Operation between different types");
+                                break;
+                        }
+
+                        if (t1 != Integer || t2 != Integer) {
+                                Error = True;
+                                printf("Error in line %d: ", t->lineno);
+                                printf("Operation with non-integer variable");
+                                break;
+                        }
+
+                        t->type = t1;
+                        break;
+                case ConstK:
+                        t->type = Integer;
+                        break;
+                case IdK:
+                        if (t->child[1]) {
+                                Error = True;
+                                printf("Error in line %d: ", t->lineno);
+                                printf("Using non-array variable as array");
+                                break;
+                        }
+                        break;
+                case FunCallK:
+                        // check whether it's function or not
+                        // check parameters
+                        break;
+                case ArrSubK:
+                        t1 = t->child[1]->type;
+                        if (t1 != Integer) {
+                                Error = True;
+                                printf("Error in line %d: ", t->lineno);
+                                printf("Array index must be INTEGER");
+                                break;
+                        }
+
+                        t->type = t1;
+                        break;
+                default:
+                        break;
+                }
+                break;
+        case DeclK:
+                switch (t->kind.decl) {
+                case ArrayK:
+                case VarK:
+                        t1 = t->child[0]->type;
+                        if (t1 == Void) {
+                                Error = True;
+                                printf("Error in line %d: ", t->lineno);
+                                printf("Variable cannot be VOID");
+                                break;
+                        }
+                        break;
+                case FunK:
+                        t1 = t->child[0]->type;
+                        if (!strcmp("main", t->child[1]->attr.name)) {
+                                if (t1 != Void) {
+                                        Error = True;
+                                        printf("Error in line %d: ", t->lineno);
+                                        printf("main function must be VOID");
+                                        break;
+                                }
+                                if (t->child[2]) {
+                                        Error = True;
+                                        printf("Error in line %d: ", t->lineno);
+                                        printf("main function must have no");
+                                        printf("parameter");
+                                        break;
+                                }
+                                if (t->sibling) {
+                                        Error = True;
+                                        printf("Error in line %d: ", t->lineno);
+                                        printf("main function must be located");
+                                        printf("at the end");
+                                        break;
+                                }
+                                break;
+                        }
+                        break;
+                default:
+                        break;
+                }
+                break;
+        default:
+                break;
+        }
+}
+
 void semantic_check(node_t *tree)
 {
+        _semantic_check(tree);
 }
