@@ -9,4 +9,6 @@
  */
 void build_symbol_table(node_t *);
 
+void semantic_check(node_t *);
+
 #endif

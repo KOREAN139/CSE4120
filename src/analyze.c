@@ -10,6 +10,8 @@ static int scope_level;
 static int func_loc;
 static int func_comp;
 
+static node_t *func_ptr;
+
 static void print_error_msg(char *name, int lineno)
 {
         printf("Error in line %d : ", lineno);
@@ -48,7 +50,11 @@ static void _build_symbol_table(node_t *t)
                                 _build_symbol_table(t->child[i]);
                         parent_symbol_table();
                         scope_level -= 1;
+                        _build_symbol_table(t->sibling);
                         break;
+                case ReturnK:
+                        t->def_ptr = func_ptr;
+                        func_ptr->def_ptr = t;
                 default:
                         for (i = 0; i < MAXCHILDREN; i++)
                                 _build_symbol_table(t->child[i]);
@@ -69,7 +75,6 @@ static void _build_symbol_table(node_t *t)
                         add_symbol_line(t->attr.name, t->lineno);
                         t->type = bucket_ptr->type;
                         t->def_ptr = bucket_ptr->def_ptr;
-                        break;
                 default:
                         for (i = 0; i < MAXCHILDREN; i++)
                                 _build_symbol_table(t->child[i]);
@@ -94,6 +99,7 @@ static void _build_symbol_table(node_t *t)
                                                 t->lineno);
                                 return;
                         }
+                        t->child[1]->def_ptr = t;
 
                         update_memory_location(location);
                         _build_symbol_table(t->sibling);
@@ -107,6 +113,9 @@ static void _build_symbol_table(node_t *t)
                                                 t->lineno);
                                 return;
                         }
+                        t->child[1]->def_ptr = t;
+
+                        func_ptr = t;
 
                         func_loc += 1;
 
@@ -132,6 +141,7 @@ static void _build_symbol_table(node_t *t)
                                                         t->lineno);
                                         return;
                                 }
+                                node_ptr->child[1]->def_ptr = node_ptr;
 
                                 location -= 4;
                                 node_ptr = node_ptr->sibling;
@@ -177,6 +187,7 @@ static void _semantic_check(node_t *t)
 
         type_t t1, t2;
         node_t *node_ptr;
+        node_t *param, *arg;
 
         switch (t->nodekind) {
         case StmtK:
@@ -191,7 +202,25 @@ static void _semantic_check(node_t *t)
                         }
                         break;
                 case ReturnK:
-                        // check function return type & its type
+                        node_ptr = t->def_ptr;
+                        if (node_ptr->type == Void) {
+                                Error = TRUE;
+                                printf("Error in line %d: ", t->lineno);
+                                printf("Void function should not");
+                                puts(" have return statement");
+                                break;
+                        } else if (!t->child[0]) {
+                                Error = TRUE;
+                                printf("Error in line %d: ", t->lineno);
+                                printf("Int function should have ");
+                                puts("integer return value");
+                                break;
+                        } else if (t->child[0]->type != Integer) {
+                                Error = TRUE;
+                                printf("Error in line %d: ", t->lineno);
+                                puts("Int function should return integer");
+                                break;
+                        }
                         break;
                 case WhileK:
                         t1 = t->child[0]->type;
@@ -234,6 +263,7 @@ static void _semantic_check(node_t *t)
                         t->type = Integer;
                         break;
                 case IdK:
+                        t->type = t->def_ptr->type;
                         break;
                 case FunCallK:
                         node_ptr = t->child[0]->def_ptr;
@@ -244,7 +274,31 @@ static void _semantic_check(node_t *t)
                                 break;
                         }
 
-                        // check parameters
+                        param = node_ptr->child[2];
+                        arg = t->child[1];
+
+                        while (param && arg) {
+                                if (param->type != arg->type) {
+                                        Error = TRUE;
+                                        break;
+                                }
+
+                                param = param->sibling;
+                                arg = arg->sibling;
+                        }
+
+                        if (param || arg) {
+                                printf("Error in line %d: ", t->lineno);
+                                if (Error) {
+                                        puts("Argument with wrong type");
+                                } else if (param) {
+                                        puts("Not enough arguments");
+                                } else {
+                                        puts("Too many arguments");
+                                }
+                                Error = TRUE;
+                        }
+
                         t->type = t->child[0]->type;
                         break;
                 case ArrSubK:
@@ -306,7 +360,15 @@ static void _semantic_check(node_t *t)
                                         break;
                                 }
                                 break;
+                        } else {
+                                if (!t->def_ptr) {
+                                        Error = TRUE;
+                                        printf("Error in line %d: ", t->lineno);
+                                        puts("Omitted return statement");
+                                        break;
+                                }
                         }
+
                         break;
                 default:
                         break;

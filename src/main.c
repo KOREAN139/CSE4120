@@ -37,6 +37,7 @@ int main(int argc, char *argv[])
         build_symbol_table(syntax_tree);
         if (!Error)
                 print_symbol_table(listing);
+        semantic_check(syntax_tree);
         /* Do build symbol table, check types */
         fclose(source);
         return 0;
