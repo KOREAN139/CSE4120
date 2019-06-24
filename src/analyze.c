@@ -53,8 +53,8 @@ static void _build_symbol_table(node_t *t)
                         _build_symbol_table(t->sibling);
                         break;
                 case ReturnK:
-                        t->def_ptr = func_ptr;
-                        func_ptr->def_ptr = t;
+                        t->ref_ptr = func_ptr;
+                        func_ptr->ref_ptr = t;
                 default:
                         for (i = 0; i < MAXCHILDREN; i++)
                                 _build_symbol_table(t->child[i]);
@@ -74,7 +74,7 @@ static void _build_symbol_table(node_t *t)
                         }
                         add_symbol_line(t->attr.name, t->lineno);
                         t->type = bucket_ptr->type;
-                        t->def_ptr = bucket_ptr->def_ptr;
+                        t->ref_ptr = bucket_ptr->ref_ptr;
                 default:
                         for (i = 0; i < MAXCHILDREN; i++)
                                 _build_symbol_table(t->child[i]);
@@ -99,7 +99,7 @@ static void _build_symbol_table(node_t *t)
                                                 t->lineno);
                                 return;
                         }
-                        t->child[1]->def_ptr = t;
+                        t->child[1]->ref_ptr = t;
 
                         update_memory_location(location);
                         _build_symbol_table(t->sibling);
@@ -113,7 +113,7 @@ static void _build_symbol_table(node_t *t)
                                                 t->lineno);
                                 return;
                         }
-                        t->child[1]->def_ptr = t;
+                        t->child[1]->ref_ptr = t;
 
                         func_ptr = t;
 
@@ -141,7 +141,7 @@ static void _build_symbol_table(node_t *t)
                                                         t->lineno);
                                         return;
                                 }
-                                node_ptr->child[1]->def_ptr = node_ptr;
+                                node_ptr->child[1]->ref_ptr = node_ptr;
 
                                 location -= 4;
                                 node_ptr = node_ptr->sibling;
@@ -202,7 +202,7 @@ static void _semantic_check(node_t *t)
                         }
                         break;
                 case ReturnK:
-                        node_ptr = t->def_ptr;
+                        node_ptr = t->ref_ptr;
                         if (node_ptr->type == Void) {
                                 Error = TRUE;
                                 printf("Error in line %d: ", t->lineno);
@@ -263,10 +263,10 @@ static void _semantic_check(node_t *t)
                         t->type = Integer;
                         break;
                 case IdK:
-                        t->type = t->def_ptr->type;
+                        t->type = t->ref_ptr->type;
                         break;
                 case FunCallK:
-                        node_ptr = t->child[0]->def_ptr;
+                        node_ptr = t->child[0]->ref_ptr;
                         if (node_ptr->kind.decl != FunK) {
                                 Error = TRUE;
                                 printf("Error in line %d: ", t->lineno);
@@ -302,7 +302,7 @@ static void _semantic_check(node_t *t)
                         t->type = t->child[0]->type;
                         break;
                 case ArrSubK:
-                        node_ptr = t->child[0]->def_ptr;
+                        node_ptr = t->child[0]->ref_ptr;
                         if (node_ptr->kind.decl != ArrayK) {
                                 Error = TRUE;
                                 printf("Error in line %d: ", t->lineno);
@@ -361,7 +361,7 @@ static void _semantic_check(node_t *t)
                                 }
                                 break;
                         } else {
-                                if (!t->def_ptr) {
+                                if (!t->ref_ptr) {
                                         Error = TRUE;
                                         printf("Error in line %d: ", t->lineno);
                                         puts("Omitted return statement");

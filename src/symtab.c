@@ -98,7 +98,7 @@ int insert_symbol(node_t *t, symbol_type_t symbol_type,
                 curr->array_size = array_size;
                 curr->memloc = memloc;
                 curr->lines = line_info;
-                curr->def_ptr = t;
+                curr->ref_ptr = t;
 
                 curr->next = hash_table[index];
                 hash_table[index] = curr;
