@@ -5,7 +5,7 @@ CFLAGS = -g
 OBJS = lex.yy.o tiny.tab.o main.o util.o symtab.o analyze.o
 
 20151623: $(OBJS)
-	$(CC) $(CFLAGS) $(OBJS) -o 20
+	$(CC) $(CFLAGS) $(OBJS) -o project3_20
 
 main.o: main.c globals.h util.h
 	$(CC) $(CFLAGS) -c main.c
@@ -30,7 +30,7 @@ lex.yy.o: lex.yy.c
 	$(CC) $(CFLAGS) -c lex.yy.c
 
 clean:
-	-rm 20
+	-rm project3_20
 	-rm $(OBJS)
 	-rm lex.yy.c
 	-rm tiny.tab*
