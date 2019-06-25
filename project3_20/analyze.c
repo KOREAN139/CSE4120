@@ -361,7 +361,7 @@ static void _semantic_check(node_t *t)
                                 }
                                 break;
                         } else {
-                                if (!t->def_ptr) {
+                                if (!t->def_ptr && t->type == Integer) {
                                         Error = TRUE;
                                         printf("Error in line %d: ", t->lineno);
                                         puts("Omitted return statement");
